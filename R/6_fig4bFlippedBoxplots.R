@@ -454,5 +454,5 @@ b <- b[b$s == 1,-ncol(b)]
 b$ct <- substr(b$V4, 1, 1)
 
 require("dplyr")
-group_by(b, ct) %>% mutate(c=1:n())
+as.data.frame(group_by(b, ct) %>% mutate(c=1:n()), 105)
 

@@ -202,10 +202,10 @@ levels(caps) <- c("ATF3", "CEBP", "CHD1", "CHD2", "MYC", "CTCF",
 gdf$feat <- as.character(caps)
 
 ## Figure 5a: Selected average-o-grams for interesting features
-pdf("~/hvl/ice/plots/f5a_boundaryEnrichmentProfiles_v2.pdf", 7.36, 4.27)
+svg("~/hvl/ice/plots/f5a_boundaryEnrichmentProfiles_v3.svg", 7.36, 4.27)
 grid.arrange(
   ggplot(subset(gdf, type == "Compartments" & 
-                  feat %in% c("CTCF", "H2A.Z", "H3K27me3")),
+                  feat %in% c("CTCF", "H2A.Z", "YY1")),
          aes(x=pos, y=mean, ymin=means.l, ymax=means.u, 
              col=ct, fill=ct, shape=ct)) +
     geom_ribbon(alpha=I(.2), aes(linetype=NA)) +
