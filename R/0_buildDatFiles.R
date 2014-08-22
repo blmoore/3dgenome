@@ -4,19 +4,18 @@
 # for all (~34). Also add in Dnase, GC to the MACS2  #
 # ENCODE datasets.                                   #
 ######################################################
-source("~/hvl/R/hvl.R")
 set.seed(42)
 
 read.pc <- function(fn)
   as.numeric(t(read.delim(fn, sep=" ", header=F))[,1])
 
-# 1 MB eigs:
-gpc <- read.pc("~/hvl/hiclib/hm/gm_corrected_hm_1Mb.hdf5_PCA.out")
-hpc <- read.pc("~/hvl/hiclib/hm/h1_corrected_hm_1Mb.hdf5_PCA.out")
-kpc <- read.pc("~/hvl/hiclib/hm/k5_corrected_hm_1Mb.hdf5_PCA.out")
+# 1 MB eigs, calculated via ICE (Imakaev et al., 2012; doi:10.1038/nmeth.2148)
+gpc <- read.pc("data/gm_corrected_hm_1Mb.hdf5_PCA.out")
+hpc <- read.pc("data/h1_corrected_hm_1Mb.hdf5_PCA.out")
+kpc <- read.pc("data/k5_corrected_hm_1Mb.hdf5_PCA.out")
 
 calcGC <- function(bedFile){
-  # Get GC content for given bed file
+  # Get GC content for given bed file (install genome from BioConductor, ~800 MB)
   library("BSgenome.Hsapiens.UCSC.hg19")
   bed <- read.delim(bedFile, header=F)
   colnames(bed) <- c("chromo", "start", "end", "id")
@@ -32,7 +31,7 @@ buildAllDat <- function(ct=c("H1hesc", "Gm12878", "K562"), all=F, force=F){
   # all == TRUE, uses all available variables, when FALSE it 
   # only uses those features available for all cell types (35).
   # Force will rebuild df and rf model, overwriting existing.
-  fl <- paste0("~/hvl/ice/binnedBW/", list.files("~/hvl/ice/binnedBW/", 
+  fl <- paste0("data/binnedBigWigs/", list.files("data/binnedBigWigs/", 
                                                  pattern=paste0(".*", ct,".*")))
   looper <- fl
   
@@ -59,17 +58,17 @@ buildAllDat <- function(ct=c("H1hesc", "Gm12878", "K562"), all=F, force=F){
     cbind(gsub(".*\\/", "", m), vars)
     looper <- m
   } else {
-    vars <- gsub(".*binnedBW/(.*?)\\..*","\\1", fl)
+    vars <- gsub(".*binnedBigWigs/(.*?)\\..*","\\1", fl)
   }
   
   # Here we know length of files, i.e. outfilename, check if already written
   # and don't remake if it is. (+1 is for GC, not added yet.)
-  outfilename <- paste0("~/hvl/ice/rds/", ct, "_", length(vars)+1, "Vars.rds")
+  outfilename <- paste0("data/rds/", ct, "_", length(vars)+1, "Vars.rds")
   
   if(!file.exists(outfilename) | force == TRUE){
     cat("Reading in files... \n\n")
     for (i in looper){
-      mark <- gsub(".*binnedBW/(.*?)\\..*","\\1", i)
+      mark <- gsub(".*binnedBigWigs/(.*?)\\..*","\\1", i)
       print(mark)
       b <- read.delim(i, header=F)
       # NB: b$5 = mean0, missing vals = 0, b$6 = mean of nonzero values
@@ -78,7 +77,7 @@ buildAllDat <- function(ct=c("H1hesc", "Gm12878", "K562"), all=F, force=F){
       rm(b)
     }
     
-    if(!file.exists("~/hvl/ice//gc.vec")){
+    if(!file.exists("databedfiles/gc.vec")){
       ## write "trimmed" bed file with actual bin ends
       library("BSgenome")
       library("BSgenome.Hsapiens.UCSC.hg19")
@@ -98,7 +97,7 @@ buildAllDat <- function(ct=c("H1hesc", "Gm12878", "K562"), all=F, force=F){
       max$binEnds <- apply(max[,3:4], 1, min)
       max$id <- paste0(max$chr, "-", max$start)
       
-      bins <- read.table("~/hvl/ice/bins.bed")
+      bins <- read.table("data/bedfiles/bins.bed")
       bins$new <- bins$V3
       
       max <- max[order(match(as.character(max$chr), unique(as.character(bins$V1)))),]
@@ -106,18 +105,18 @@ buildAllDat <- function(ct=c("H1hesc", "Gm12878", "K562"), all=F, force=F){
       bins[bins$V4 %in% max$id,]$new <- max$binEnds
       bins$V3 <- bins$new
       bins$new <- NULL
-      write.table(bins, "~/hvl/ice/bins_trimmed.bed", sep="\t", quote=F,
+      write.table(bins, "data/bedfiles/bins_trimmed.bed", sep="\t", quote=F,
                   row.names=F, col.names=F)
       
       # max length of hg19 chromosome length(Hsapines$chrN)
       
-      gc <- calcGC("~/hvl/ice//bins_trimmed.bed")
-      write.table(gc, "~/hvl/ice/gc.vec", quote=F, row.names=F,
+      gc <- calcGC("data/bedfile/bins_trimmed.bed")
+      write.table(gc, "data/gc.vec", quote=F, row.names=F,
                   col.names=F)
     }
     
     # calc GC and append (i.e. bedtools nuc -fi hg19.fa -bed 1mb_2811.bed > 1mb_gc.out)
-    gc <- read.table("~/hvl/ice//gc.vec")
+    gc <- read.table("data/gc.vec")
     all.dat$GC <- gc[,1]
     
     # Double-check column names 
@@ -136,7 +135,7 @@ buildAllDat <- function(ct=c("H1hesc", "Gm12878", "K562"), all=F, force=F){
     all.dat <- readRDS(outfilename)
   }
   
-  rf.file <- paste0("~/hvl/ice/rds/", ct, "_", ncol(all.dat[,-1]), "Vars_RFmod.rds")
+  rf.file <- paste0("data/rds/", ct, "_", ncol(all.dat[,-1]), "Vars_RFmod.rds")
   if(!file.exists(rf.file) | force == TRUE){
     res <- modelEigens.all(all.dat, n=500)
     saveRDS(res, rf.file)
@@ -148,7 +147,7 @@ buildAllDat <- function(ct=c("H1hesc", "Gm12878", "K562"), all=F, force=F){
   cat("Plotting ...\n\n")
   matched.col <- if(ct == "H1hesc") "orange" else 
     if(ct == "K562") "red" else "blue"
-  pdf(paste0("~/hvl/ice/plots/", ct, "_", ncol(all.dat[,-1]), "Vars_RFres.pdf"),
+  pdf(paste0("figures/", ct, "_", ncol(all.dat[,-1]), "Vars_RFres.pdf"),
       6, 6)
   plotPredRes.ice(x=res$predicted, y=all.dat$eigen, 
                   ct=ct, col=matched.col)
@@ -177,6 +176,6 @@ writeEigBed <- function(dat, fn){
   write.table(df, file=fn, quote=F, row.names=F, col.names=F, sep="\t")
 }
 
-writeEigBed(h.dat, "~/hvl/ice/h1_eigs.bed")
-writeEigBed(g.dat, "~/hvl/ice/gm_eigs.bed")
-writeEigBed(k.dat, "~/hvl/ice/k5_eigs.bed")
+writeEigBed(h.dat, "data/bedfiles/h1_eigs.bed")
+writeEigBed(g.dat, "data/bedfiles/gm_eigs.bed")
+writeEigBed(k.dat, "data/bedfiles/k5_eigs.bed")
