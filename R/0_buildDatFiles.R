@@ -4,15 +4,16 @@
 # for all (~34). Also add in Dnase, GC to the MACS2  #
 # ENCODE datasets.                                   #
 ######################################################
+devtools::load_all("~/blmR")
 set.seed(42)
 
 read.pc <- function(fn)
   as.numeric(t(read.delim(fn, sep=" ", header=F))[,1])
 
 # 1 MB eigs, calculated via ICE (Imakaev et al., 2012; doi:10.1038/nmeth.2148)
-gpc <- read.pc("data/gm_corrected_hm_1Mb.hdf5_PCA.out")
-hpc <- read.pc("data/h1_corrected_hm_1Mb.hdf5_PCA.out")
-kpc <- read.pc("data/k5_corrected_hm_1Mb.hdf5_PCA.out")
+gpc <- read.pc("data/text/gm_corrected_hm_1Mb.hdf5_PCA.out")
+hpc <- read.pc("data/text/h1_corrected_hm_1Mb.hdf5_PCA.out")
+kpc <- read.pc("data/text/k5_corrected_hm_1Mb.hdf5_PCA.out")
 
 calcGC <- function(bedFile){
   # Get GC content for given bed file (install genome from BioConductor, ~800 MB)
@@ -77,7 +78,7 @@ buildAllDat <- function(ct=c("H1hesc", "Gm12878", "K562"), all=F, force=F){
       rm(b)
     }
     
-    if(!file.exists("databedfiles/gc.vec")){
+    if(!file.exists("data/text/gc.vec")){
       ## write "trimmed" bed file with actual bin ends
       library("BSgenome")
       library("BSgenome.Hsapiens.UCSC.hg19")
@@ -109,14 +110,14 @@ buildAllDat <- function(ct=c("H1hesc", "Gm12878", "K562"), all=F, force=F){
                   row.names=F, col.names=F)
       
       # max length of hg19 chromosome length(Hsapines$chrN)
-      
-      gc <- calcGC("data/bedfile/bins_trimmed.bed")
-      write.table(gc, "data/gc.vec", quote=F, row.names=F,
+    
+      gc <- calcGC("data/bedfiles/bins_trimmed.bed")
+      write.table(gc, "data/text/gc.vec", quote=F, row.names=F,
                   col.names=F)
     }
     
     # calc GC and append (i.e. bedtools nuc -fi hg19.fa -bed 1mb_2811.bed > 1mb_gc.out)
-    gc <- read.table("data/gc.vec")
+    gc <- read.table("data/text/gc.vec")
     all.dat$GC <- gc[,1]
     
     # Double-check column names 
