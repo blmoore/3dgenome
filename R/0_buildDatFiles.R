@@ -20,9 +20,10 @@ calcGC <- function(bedFile){
   library("BSgenome.Hsapiens.UCSC.hg19")
   bed <- read.delim(bedFile, header=F)
   colnames(bed) <- c("chromo", "start", "end", "id")
-  seqs <- getSeq(Hsapiens, bed$chromo, start=bed$start+1, end=bed$end, width=NA, 
-                 as.character=F) 
-  nucFreqs <- alphabetFrequency(seqs, as.prob=T, collapse=F, baseOnly=T)
+  seqs <- getSeq(Hsapiens, bed$chromo, start=bed$start+1, 
+                 end=bed$end, width=NA, as.character=F) 
+  nucFreqs <- alphabetFrequency(seqs, as.prob=T, 
+                                collapse=F, baseOnly=T)
   gc <- (nucFreqs[,2] + nucFreqs[,3]) 
   gc
 }
@@ -32,8 +33,9 @@ buildAllDat <- function(ct=c("H1hesc", "Gm12878", "K562"), all=F, force=F){
   # all == TRUE, uses all available variables, when FALSE it 
   # only uses those features available for all cell types (35).
   # Force will rebuild df and rf model, overwriting existing.
-  fl <- paste0("data/binnedBigWigs/", list.files("data/binnedBigWigs/", 
-                                                 pattern=paste0(".*", ct,".*")))
+  fl <- paste0("data/binnedBigWigs/", 
+               list.files("data/binnedBigWigs/", 
+                          pattern=paste0(".*", ct,".*")))
   looper <- fl
   
   # initiate all.dat df
@@ -56,7 +58,7 @@ buildAllDat <- function(ct=c("H1hesc", "Gm12878", "K562"), all=F, force=F){
     m <- unique(m)
     
     # Inspect matches:
-    cbind(gsub(".*\\/", "", m), vars)
+    # cbind(gsub(".*\\/", "", m), vars)
     looper <- m
   } else {
     vars <- gsub(".*binnedBigWigs/(.*?)\\..*","\\1", fl)
@@ -101,7 +103,8 @@ buildAllDat <- function(ct=c("H1hesc", "Gm12878", "K562"), all=F, force=F){
       bins <- read.table("data/bedfiles/bins.bed")
       bins$new <- bins$V3
       
-      max <- max[order(match(as.character(max$chr), unique(as.character(bins$V1)))),]
+      max <- max[order(match(as.character(max$chr), 
+                             unique(as.character(bins$V1)))),]
       
       bins[bins$V4 %in% max$id,]$new <- max$binEnds
       bins$V3 <- bins$new
@@ -109,8 +112,7 @@ buildAllDat <- function(ct=c("H1hesc", "Gm12878", "K562"), all=F, force=F){
       write.table(bins, "data/bedfiles/bins_trimmed.bed", sep="\t", quote=F,
                   row.names=F, col.names=F)
       
-      # max length of hg19 chromosome length(Hsapines$chrN)
-    
+      # only needs to be done once
       gc <- calcGC("data/bedfiles/bins_trimmed.bed")
       write.table(gc, "data/text/gc.vec", quote=F, row.names=F,
                   col.names=F)
@@ -120,16 +122,15 @@ buildAllDat <- function(ct=c("H1hesc", "Gm12878", "K562"), all=F, force=F){
     gc <- read.table("data/text/gc.vec")
     all.dat$GC <- gc[,1]
     
-    # Double-check column names 
-    cat("\n\nEnsure these names match !\n")
     eig <- if(ct == "H1hesc") hpc else 
       if(ct == "K562") kpc else gpc
     all.dat <- data.frame(eigen=eig, all.dat)
+    # Double-check column names 
+    cat("\n\nCheck these names match !\n")
     print(cbind(colnames(all.dat), c("eigen", vars, "GC")))
     colnames(all.dat)[-1] <- c(vars, "GC")
     
     cat("\nBuilding Random Forest...\n\n")
-    print(colnames(all.dat))
     saveRDS(all.dat, outfilename)
   } else {
     cat("Dataframe already exists! Reading...\n\n")

@@ -3,8 +3,11 @@
 # section in figure 1, and the entire genome supplementary #
 # figure.                                                  #
 ############################################################
+library("ggplot2")
 library("gridExtra")
-source("~/hvl/R/hvl.R")
+library("blmR")
+h.dat <- readRDS("data/rds/H1hesc_35Vars.rds")
+g.dat <- readRDS("data/rds/")
 options(scipen=99)
 
 chrs <- gsub("-.*", "", rownames(h.dat))
@@ -54,26 +57,27 @@ eigens$chr <- factor(eigens$chr, levels=paste0("chr", c(1:22, "X")))
 bigcs <- eigens[eigens$chr %in% paste0("chr", 1:11),]
 smallc <- eigens[!eigens$chr %in% paste0("chr", 1:11),]
 
-pdf("~/hvl/ice/plots/s1_wiggles.pdf", 8, 10)
+pdf("figures/suppl/s1_GenomewideWigglePlots.pdf", 8, 10)
 grid.arrange(
   ggplot(bigcs, aes(x=pos/1000000, y=eig, group=ct, col=ct)) + 
     facet_wrap(~chr, nrow=1) + geom_line() + coord_flip() + 
     xlab("Chromosome position (Mb)") + theme_bw() +
     labs(colour = "Cell type") + ylab("") +
-    scale_y_continuous(limits=c(-.22,.22), breaks=c(-.19,0,.19), labels=c("B", "", "A"))
+    scale_y_continuous(limits=c(-.22,.22), 
+                       breaks=c(-.19,0,.19), labels=c("B", "", "A"))
   ,
   ggplot(smallc, aes(x=pos/1000000, y=eig, group=ct, col=ct)) + 
     facet_wrap(~chr, nrow=1) + geom_line() + coord_flip() + 
     xlab("Chromosome position (Mb)") + theme_bw() +
     labs(colour = "Cell type") + ylab("") +
-    scale_y_continuous(limits=c(-.3,.3), breaks=c(-.28,0,.28), labels=c("B", "", "A"))
+    scale_y_continuous(limits=c(-.3,.3), 
+                       breaks=c(-.28,0,.28), labels=c("B", "", "A"))
 )
 dev.off()
-## END
 
 pdf("~/hvl/ice/plots/f1_chr2.pdf", 3, 7)
-ggplot(subset(eigens, chr == "chr2"), aes(x=pos/1000000, 
-                                          y=eig*-1, group=ct, col=ct)) + 
+ggplot(subset(eigens, chr == "chr2"), 
+       aes(x=pos/1000000, y=eig*-1, group=ct, col=ct)) + 
   facet_wrap(~chr, nrow=1) + geom_line() + coord_flip() + 
   xlab("Chromosome position (Mb)") + theme_bw() +
   labs(colour = "Cell type") + ylab("") +
