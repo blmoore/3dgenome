@@ -17,7 +17,7 @@ devtools::install_github("blmR", "blmoore")
 
 ## R packages
 
-Lots of commonly-installed R packages are used in these scripts, including but not limited to: 
+Lots of commonly-installed R packages are also used, including but not limited to: 
 
 ### CRAN
 
