@@ -5,11 +5,20 @@ Scripts to recreate figures in paper: _Integrative modelling reveals the princip
 
 Instructions on how to run, dependencies etc. will follow...
 
-blmR
-====
+# Dependencies
 
-These scripts rely on an R package I've written called "blmR". To install, use the `devtools` package:
+## blmR
+
+These scripts rely on an ad-hoc R package I've written called "blmR". To install, use the `devtools` package:
 
 ```r
 devtools::install_github("blmR", "blmoore")
 ```
+
+## External programs
+
+* `bedtools`
+* `bigWigAverageOverBed`^
+* `ICE`^
+
+^ To generate new input files, otherwise not required
