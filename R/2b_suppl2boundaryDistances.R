@@ -115,9 +115,9 @@ comp.dist <- function(tb, k, g, r){
 }
 
 ## 1) TADs:
-htb <- read.table("~/hvl/ice/boundaries/h1_tbounds.bed")
-ktb <- read.table("~/hvl/ice/boundaries/k5_tbounds.bed")
-gtb <- read.table("~/hvl/ice/boundaries/gm_tbounds.bed")
+htb <- read.table("data/bedfiles/h1_tadbounds.bed")
+ktb <- read.table("data/bedfiles/k5_tadbounds.bed")
+gtb <- read.table("data/bedfiles/gm_tadbounds.bed")
 
 rtb <- rand.tads(htb)
 tdf <- tad.dist(htb, ktb, gtb, rtb)
@@ -126,27 +126,27 @@ taddf <- cbind(taddf, bound="TADs")
 
 # 2) Compartments:
 ## Original bounds (100 kb but according to 1 Mb bins)
-hcb <- read.table("~/hvl/ice/boundaries/h_cb.bed")
-kcb <- read.table("~/hvl/ice/boundaries/k_cb.bed")
-gcb <- read.table("~/hvl/ice/boundaries/g_cb.bed")
+hcb <- read.table("data/bedfiles/h1_compartmentbounds.bed")
+kcb <- read.table("data/bedfiles/k5_compartmentbounds.bed")
+gcb <- read.table("data/bedfiles/gm_compartmentbounds.bed")
 
 rcb <- rand.comps(hcb)
 cdf <- comp.dist(hcb, kcb, gcb, rcb)
 compdf <- melt(cdf)
 compdf <- cbind(compdf, bound="Compartments")
-#saveRDS(compdf, "~/hvl/tads/compECDF_dat.rds")
+#saveRDS(compdf, "data/rds/compECDF_dat.rds")
 
 # 3) Graph both:
 bothdf <- rbind(taddf, compdf)
 options(scipen=999)
-#pdf("~/hvl/ice/plots/supplementary/s2a_boundsEcdf.pdf", 6, 3.5)
+pdf("figures/suppl/s2a_boundsEcdf.pdf", 6, 3.5)
 ggplot(bothdf, aes(x=value+1, col=variable)) +
   stat_ecdf(geom="line", size=1.1) + scale_x_log10() +
   facet_grid(.~bound, scales="free_x") + theme_bw() +
   theme(legend.position=c(.15,.8), legend.background=element_blank()) +
   labs(col="", y="ECDF", x="Distance to nearest H1 boundary (bp)") +
   scale_color_brewer(type="qual", palette=3)
-#dev.off()
+dev.off()
 
 # 4) Misc., statistical tests etc.
 median(tdf$K562)    # median: 300kb apart
@@ -166,11 +166,11 @@ ks.test(tdf$K562, tdf$Null)
 ks.test(cdf$K562, cdf$Null)
 
 ## Fig 2b: corrgram of eigenvector correlations:
-#pdf("~/hvl/ice/plots/supplementary/s2b_compartmentCorrgram.pdf", 6, 6)
+pdf("figures//suppl/s2b_compartmentCorrgram.pdf", 6, 6)
 corrgram(data.frame(GM12878  = g.dat$eigen,
                    `H1 hESC` = h.dat$eigen,
                     K562     = k.dat$eigen),
          lower.panel = panel.pts2, pch = 20,
          upper.panel = panel.conf,
          diag.panel  = panel.density)
-#dev.off()
+dev.off()
