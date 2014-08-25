@@ -15,6 +15,27 @@ These scripts rely on an ad-hoc R package I've written called "blmR". To install
 devtools::install_github("blmR", "blmoore")
 ```
 
+## R packages
+
+Lots of commonly-installed R packages are used in these scripts, including but not limited to: 
+
+### CRAN
+
+* `caret`
+* `dplyr` 
+* `ggplot2`
+* `gridExtra`
+* `plotrix`
+* `randomForest`
+* `RColorBrewer`
+* `reshape2`
+* `RHmm`
+
+### Bioconductor
+
+* `BSgenome` (and UCSC hg19)
+* `GenomicRanges`
+
 ## External programs
 
 * `bedtools`
