@@ -9,8 +9,7 @@ library("gplots")
 library("pvclust")
 library("RColorBrewer")
 library("snow")
-source("~/hvl/R/hvl.R")
-devtools::load_all("blmR")
+library("blmR")
 set.seed(42)
 
 ## Bootstrapped heirarchical clustering to estimate
@@ -74,15 +73,15 @@ clus.heat <- function(dat, clus, main){
             zlim=c(-1,1))
 }
 
-pdf("~/hvl/ice/plots/supplementary/g.featmap_v3.pdf", 7, 7)
+pdf("figures/suppl/s4_gfeatmap.pdf", 7, 7)
 clus.heat(g.dat, gpv, "GM12878")
 dev.off()
 
-pdf("~/hvl/ice/plots/supplementary/h.featmap_v3.pdf", 7, 7)
+pdf("figures/suppl/s4_hfeatmap.pdf", 7, 7)
 clus.heat(h.dat, hpv, "H1 hESC")
 dev.off()
 
-pdf("~/hvl/ice/plots/supplementary/k.featmap_v3.pdf", 7, 7)
+pdf("figures/suppl/s4_kfeatmap.pdf", 7, 7)
 clus.heat(k.dat, kpv, "K562")
 dev.off()
 
