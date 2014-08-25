@@ -85,9 +85,9 @@ legend("topright", fill=c(pal[1], pal[2], pal[3]), xpd=T, bty="n",
 dev.off()
 
 pdf(6, 6, file="figures/f3ai_gmXapplyK5.pdf")
-plotPredRes.ice(x=gk, y=k.dat$eigen, scale.factor=.6, ct="GM12878 → K562")
+plotPredRes(x=gk, y=k.dat$eigen, scale.factor=.6, ct="GM12878 → K562")
 dev.off()
 pdf(6, 6, file="figures/f3aii_k5XapplyGm.pdf")
-plotPredRes.ice(x=kg, y=g.dat$eigen, scale.factor=.7, ct="K562 → GM12878", col="red")
+plotPredRes(x=kg, y=g.dat$eigen, scale.factor=.7, ct="K562 → GM12878", col="red")
 dev.off()
 
