@@ -1,9 +1,0 @@
-Package: r3dgenome
-Title: The antecedants of higher order chromatin structure
-Description: Scripts to reproduce figures and some of the analysise performed in the paper titled "The antecedants of higher order chromatin structure: Insights from integrative modelling".
-Version: 0.1
-Authors@R: 'Benjamin L. Moore <b3nmoore@gmail.com>'
-Depends: R (>= 3.0.2)
-License: MIT
-LazyData: true
-URL: http://blmoore.github.io/3dgenome
