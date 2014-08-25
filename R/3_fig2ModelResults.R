@@ -6,28 +6,28 @@
 # of variability estimated by K-fold cross validation.  #
 #########################################################
 library("randomForest")
-source("~/hvl/R/hvl.R")
+library("blmR")
 
 # We've already calculated + plotted OOB prediction results 
 # in the script: 0_buildDatfiles.R, first look at OOB var imp
-g.mod <- readRDS("~/hvl/ice/rds/Gm12878_35Vars_RFmod.rds")
-h.mod <- readRDS("~/hvl/ice/rds/H1hesc_35Vars_RFmod.rds")
-k.mod <- readRDS("~/hvl/ice/rds/K562_35Vars_RFmod.rds")
+g.mod <- readRDS("data/rds/Gm12878_35Vars_RFmod.rds")
+h.mod <- readRDS("data/rds/H1hesc_35Vars_RFmod.rds")
+k.mod <- readRDS("data/rds/K562_35Vars_RFmod.rds")
 
 ## Fig 2a, model predictive accuracy per cell type. Note 
 ## these can't be combined on plot device with mfrow etc.
 ## due to the complicated layout() used to add side densities.
-pdf("~/hvl/ice/plots/f2_gmRes.pdf", 6, 6)
+pdf("figures/f2_gmRes.pdf", 6, 6)
 plotPredRes.ice(x=g.mod$predicted, y=g.dat$eigen,
                 col="blue", ct="GM12878", scale.factor=.8)
 dev.off()
 
-pdf("~/hvl/ice/plots/f2_h1Res.pdf", 6, 6)
+pdf("figures/f2_h1Res.pdf", 6, 6)
 plotPredRes.ice(x=h.mod$predicted, y=h.dat$eigen,
                 col="orange", ct="H1 hESC", scale.factor=.7)
 dev.off()
 
-pdf("~/hvl/ice/plots/f2_k5Res.pdf", 6, 6)
+pdf("figures/f2_k5Res.pdf", 6, 6)
 plotPredRes.ice(x=k.mod$predicted, y=k.dat$eigen,
                 col="red", ct="K562", scale.factor=.6)
 dev.off()
@@ -49,7 +49,7 @@ impBars <- function(mod, ...){
   barplot(rev(imp[1:10]), horiz=T, las=1, cex.names=1.5, ...)
 }
 
-pdf("~/hvl/ice/plots/f2b_varImpPerModel_v2.pdf", 9, 3.5)
+pdf("figures/f2b_varImpPerModel_v2.pdf", 9, 3.5)
 par(mfrow=c(1,3), mar=c(3,7,1.5,0.5), oma=c(2,0,0,0), mgp=c(0,.5,0))
 impBars(g.mod, main="GM12878", col="#0000ff92", border=NA)
 impBars(h.mod, main="H1 hESC", col="#FFA50092", border=NA)  

@@ -4,7 +4,7 @@
 # for all (~34). Also add in Dnase, GC to the MACS2  #
 # ENCODE datasets.                                   #
 ######################################################
-devtools::load_all("~/blmR")
+library("blmR")
 set.seed(42)
 
 read.pc <- function(fn)
@@ -144,16 +144,6 @@ buildAllDat <- function(ct=c("H1hesc", "Gm12878", "K562"), all=F, force=F){
   } else {
     res  <- readRDS(rf.file)
   }
-  
-  # Plot model results
-  cat("Plotting ...\n\n")
-  matched.col <- if(ct == "H1hesc") "orange" else 
-    if(ct == "K562") "red" else "blue"
-  pdf(paste0("figures/", ct, "_", ncol(all.dat[,-1]), "Vars_RFres.pdf"),
-      6, 6)
-  plotPredRes.ice(x=res$predicted, y=all.dat$eigen, 
-                  ct=ct, col=matched.col)
-  dev.off()
 }
 
 # Build 35 feature data frames:
