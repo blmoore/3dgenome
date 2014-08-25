@@ -13,8 +13,27 @@ library("data.table")
 library("dplyr")
 library("GenomicRanges")
 library("ggplot2")
-require("gridExtra")
-source("~/hvl/R/hvl.R")
+library("gridExtra")
+library("blmR")
+
+# To run this script you must download the following files:
+#  * chromhmm.segway.gm12878.comb11.concord4.bed.bed
+#  * chromhmm.segway.h1hesc.comb11.concord4.bed.bed
+#  * chromhmm.segway.k562.comb11.concord4.bed.bed
+# and place them under bedfiles/
+# These are the ENCODE combined chromatin state predictions
+# for ChromHMM + Segway, from the Jan 2011 data freeze. At 
+# the time of writing, these are a default track in UCSC genome
+# browser, and can also be downloaded from:
+#  http://ebi.edu.au/ftp/software/software/ensembl/encode/integration_data_jan2011/byDataType/segmentations/jan2011/Combined_7_state/
+
+if(!file.exists("data/bedfiles/chromhmm.segway.gm12878.comb11.concord4.bed.bed"))
+  stop("No chromatin state file found at: 
+      \tdata/bedfiles/chromhmm.segway.gm12878.comb11.concord4.bed.bed \nCannot run.")
+
+g.dat <- readRDS("data/rds/Gm12878_35Vars.rds")
+h.dat <- readRDS("data/rds/H1hesc_35Vars.rds")
+k.dat <- readRDS("data/rds/K562_35Vars.rds")
 
 ## 1) Calculate intersections between flipped regions
 ##    and chromHMM / SegWay chromatin states
@@ -52,7 +71,7 @@ writeBed <- function(flip=c("h.open", "h.closed",
                    start = gsub(".*-", "", rns),
                    end   = as.numeric(gsub(".*-", "", rns)) + 1e6,
                    id    = paste0(flip, ".", seq_along(rns)))
-  write.table(df, file=paste0("~/hvl/ice/bedfiles/", flip, ".bed"),
+  write.table(df, file=paste0("data/bedfiles/", flip, ".bed"),
               quote=F, row.names=F, col.names=F, sep="\t")
 }
 
@@ -75,19 +94,18 @@ for(f in fnames){
                        ifelse(substr(f, 1, 1) == "g", 
                               "chromhmm.segway.gm12878.comb11.concord4.bed.bed",
                               "chromhmm.segway.k562.comb11.concord4.bed.bed"))
-  cmd <- paste0("bedtools intersect -a ~/hvl/ice/bedfiles/", f, " -b ~/hvl/ice/bedfiles/", 
-                state.file, " -wao > ~/hvl/ice/", f, "_isect.out")
+  cmd <- paste0("bedtools intersect -a data/bedfiles/", f, " -b data/bedfiles/", 
+                state.file, " -wao > data/text/", f, "_isect.out")
   cat("Running: ", cmd, "\n")
   res <- system(cmd, intern=F)
 }
-
 ### END 1 ###
 
 ## 2) Aggregate and analyse intersection results (no cell type specific / shared distinction)
 ctFeats <- function(ct=c("h", "g", "k")){
-  hoi <- read.table(paste0("~/hvl/ice/", ct, ".open.bed_isect.out"), stringsAsFactors=F)
-  hci <- read.table(paste0("~/hvl/ice/", ct, ".closed.bed_isect.out"), stringsAsFactors=F)
-  none <- read.table("~/hvl/ice/none.bed_isect.out", stringsAsFactors=F)
+  hoi <- read.table(paste0("data/text/", ct, ".open.bed_isect.out"), stringsAsFactors=F)
+  hci <- read.table(paste0("data/text/", ct, ".closed.bed_isect.out"), stringsAsFactors=F)
+  none <- read.table("data/text/none.bed_isect.out", stringsAsFactors=F)
   cnames <- c("chr", "start", "end", "id",
               "chr.b", "start.b", "end.b", "feature",
               "1k", "dot", "start.o", "end.o", "col", "overlap")
@@ -99,7 +117,7 @@ ctFeats <- function(ct=c("h", "g", "k")){
   none$flip <- "none"
   hi <- rbind(hoi, hci, none)
   
-  perFeat <- group_by(hi, flip, id, feature) %.% summarise(olap = sum(overlap))
+  perFeat <- group_by(hi, flip, id, feature) %>% summarise(olap = sum(overlap))
   perFeat <- subset(perFeat, feature != ".")
   perFeat$ct <- ct
   return(perFeat)
@@ -110,24 +128,15 @@ gf1 <- ctFeats("g")
 kf1 <- ctFeats("k")
 f1 <- rbind(hf1, gf1, kf1)
 
-ggplot(f1, aes(x=flip, y=olap/1e3, fill=flip)) +
-  facet_wrap(ct~feature, scales="free_y", nrow=3) +
-  geom_boxplot(notch=T, position=position_dodge(.8),
-               outlier.size=.5) +
-  labs(list(y="Annotation coverage per Mb (kb)", x="",
-            fill="Flipped state")) +
-  scale_fill_brewer(palette="Blues") + theme_bw()
-
 
 ## 3) Build subset of annotations that are preserved in all cell types (?)
-
 class.vec <- c("character", "numeric", "numeric", "character", "numeric", "character",
                "numeric", "numeric", "character")
-chrom.gm <- read.table("~/hvl/ice/bedfiles/chromhmm.segway.gm12878.comb11.concord4.bed.bed",
+chrom.gm <- read.table("data/bedfiles/chromhmm.segway.gm12878.comb11.concord4.bed.bed",
                        stringsAsFactors=F, colClasses=class.vec)
-chrom.h1 <- read.table("~/hvl/ice/bedfiles/chromhmm.segway.h1hesc.comb11.concord4.bed.bed",
+chrom.h1 <- read.table("data/bedfiles/chromhmm.segway.h1hesc.comb11.concord4.bed.bed",
                        stringsAsFactor=F, colClasses=class.vec)
-chrom.k5 <- read.table("~/hvl/ice/bedfiles/chromhmm.segway.k562.comb11.concord4.bed.bed",
+chrom.k5 <- read.table("data/bedfiles/chromhmm.segway.k562.comb11.concord4.bed.bed",
                        stringsAsFactors=F, colClasses=class.vec)
 
 c.gm <- with(chrom.gm, GRanges(V1, IRanges(start=V2, end=V3), "+", feat=V4))
@@ -173,6 +182,7 @@ featSubset <- function(f=unique(c.k5$feat), c1=c("g", "h", "k")){
 gm.feats <- sapply(unique(c.k5$feat), featSubset, c1="g", simplify=F)
 gm.feats <- do.call(rbind, gm.feats)
 
+# unused:
 par(mfrow=c(4,4), mar=c(2,4,3,1.5))
 options(scipen=99)
 pie.dens <- function(feat){
@@ -183,7 +193,6 @@ pie.dens <- function(feat){
 sapply(unique(gm.feats$feat), pie.dens)
 
 dev.off()
-plot(density(gm.feats[gm.feats$feat == "R",]$width), log="x")
 
 h1.feats <- sapply(unique(c.k5$feat), featSubset, c1="h", simplify=F)
 h1.feats <- do.call(rbind, h1.feats)
@@ -197,16 +206,16 @@ k5.feats <- do.call(rbind, k5.feats)
 splitWrite <- function(feats, ct=c("g", "h", "k")){
   options(scipen=99)
   write.table(subset(feats, status == "in:all")[,c(1:3, 6)],
-              file = paste0("~/hvl/ice/bedfiles/", ct, "_shared_chromstates.bed"),
+              file = paste0("data/bedfiles/", ct, "_shared_chromstates.bed"),
               row.names=F, col.names=F, quote=F, sep="\t")
   write.table(subset(feats, status == "in:one")[,c(1:3, 6)],
-              file = paste0("~/hvl/ice/bedfiles/", ct, "_celltypespecific_chromstates.bed"),
+              file = paste0("data/bedfiles/", ct, "_celltypespecific_chromstates.bed"),
               row.names=F, col.names=F, quote=F, sep="\t")
   write.table(subset(feats, status == "in:some")[,c(1:3, 6)],
-              file = paste0("~/hvl/ice/bedfiles/", ct, "_partshared_chromstates.bed"),
+              file = paste0("data/bedfiles/", ct, "_partshared_chromstates.bed"),
               row.names=F, col.names=F, quote=F, sep="\t")
   write.table(subset(feats, status %in% c("in:all", "in:some"))[,c(1:3, 6)],
-              file = paste0("~/hvl/ice/bedfiles/", ct, "_shared2plus_chromstates.bed"),
+              file = paste0("data/bedfiles/", ct, "_shared2plus_chromstates.bed"),
               row.names=F, col.names=F, quote=F, sep="\t")
 }
 
@@ -218,16 +227,16 @@ for(f in fnames[-length(fnames)]){
   ct <- substr(f, 1, 1)
   flip <- ifelse(grepl("closed", f), "closed", 
                  ifelse(grepl("open", f), "open", "none"))
-  cmd1 <- paste0("bedtools intersect -a ~/hvl/ice/bedfiles/", f, " -b ~/hvl/ice/bedfiles/", 
-                 ct, "_celltypespecific_chromstates.bed -wao > ~/hvl/ice/bedfiles/", 
+  cmd1 <- paste0("bedtools intersect -a data/bedfiles/", f, " -b data/bedfiles/", 
+                 ct, "_celltypespecific_chromstates.bed -wao > data/bedfiles/", 
                  f, "_cts.out")
   ## This command treats "shared" as present in ALL THREE only:
-  #   cmd2 <- paste0("bedtools intersect -a ~/hvl/ice/bedfiles/", f, " -b ~/hvl/ice/bedfiles/", 
-  #                  ct, "_shared_chromstates.bed -wao > ~/hvl/ice/bedfiles/", 
+  #   cmd2 <- paste0("bedtools intersect -a bedfiles/", f, " -b bedfiles/", 
+  #                  ct, "_shared_chromstates.bed -wao > bedfiles/", 
   #                  f, "_shared.out")
   ## This one considers "shared" as anything not cell type specific:
-  cmd2 <- paste0("bedtools intersect -a ~/hvl/ice/bedfiles/", f, " -b ~/hvl/ice/bedfiles/", 
-                 ct, "_shared2plus_chromstates.bed -wao > ~/hvl/ice/bedfiles/", 
+  cmd2 <- paste0("bedtools intersect -a data/bedfiles/", f, " -b data/bedfiles/", 
+                 ct, "_shared2plus_chromstates.bed -wao > data/bedfiles/", 
                  f, "_shared.out")
   cat("Running: ", cmd1, "\n\n")
   system(cmd1, intern=F)
@@ -238,11 +247,11 @@ for(f in fnames[-length(fnames)]){
 ## process the blocks with no flip for comparison:
 for(ct in c("h", "g", "k")){
   ## Same as above, rm "2plus" for shared == ALL 3 cell type overlap
-  cmd3 <- paste0("bedtools intersect -a ~/hvl/ice/bedfiles/none.bed  -b ~/hvl/ice/bedfiles/", 
-                 ct, "_shared2plus_chromstates.bed -wao > ~/hvl/ice/bedfiles/", 
+  cmd3 <- paste0("bedtools intersect -a data/bedfiles/none.bed  -b data/bedfiles/", 
+                 ct, "_shared2plus_chromstates.bed -wao > data/bedfiles/", 
                  ct, ".none_shared.out")
-  cmd4 <- paste0("bedtools intersect -a ~/hvl/ice/bedfiles/none.bed -b ~/hvl/ice/bedfiles/", 
-                 ct, "_celltypespecific_chromstates.bed -wao > ~/hvl/ice/bedfiles/", 
+  cmd4 <- paste0("bedtools intersect -a data/bedfiles/none.bed -b data/bedfiles/", 
+                 ct, "_celltypespecific_chromstates.bed -wao > data/bedfiles/", 
                  ct, ".none_cts.out")
   cat("Running: ", cmd3, "\n\n")
   system(cmd3, intern=F)
@@ -260,7 +269,7 @@ ctFeats.p2 <- function(ct=c("h", "g", "k"), overlap=TRUE){
               "chr.b", "start.b", "end.b", "feature", "overlap")
   
   read.feat <- function(file){
-    f <- read.table(paste0("~/hvl/ice/bedfiles/", file), stringsAsFactors=F, col.names=cnames)
+    f <- read.table(paste0("data/bedfiles/", file), stringsAsFactors=F, col.names=cnames)
     f$flip <- ifelse(grepl("open", file), "open",
                      ifelse(grepl("closed", file), "closed", "none"))
     f$type <- ifelse(grepl("shared", file), "shared",
@@ -315,7 +324,7 @@ pF <- rbind(pF.g, pF.h, pF.k)
 pF$ct <- ifelse(pF$ct == "h", "H1 hESC", 
                 ifelse(pF$ct == "g", "GM12878", "K562"))
 stopifnot(length(unique(pF$type)) == 2)
-#pF$type
+
 pF$type <- ifelse(pF$type == "cts", "Cell type specific", "Shared")
 
 options(scipen=99)
@@ -358,18 +367,18 @@ f4.plot <- function(chrom.state){
 }
 
 # Figure 4b, flipped open compartments enriched for enhancers
-#pdf("~/hvl/ice/plots/f4b_enhancerEnrichFlipped.pdf", 7, 5.5)
+pdf("figures/f4b_enhancerEnrichFlipped.pdf", 7, 5.5)
 f4.plot("E")
-#dev.off()
+dev.off()
 
 # interesting:
 f4.plot("WE")
 f4.plot("CTCF")
 f4.plot("TSS")
 
-#pdf("~/hvl/ice/plots/supplementary/s5_transcribedFlipped.pdf", 7, 5.5)
+pdf("figures/suppl/s6_transcribedFlipped.pdf", 7, 5.5)
 f4.plot("T")
-#dev.off()
+dev.off()
 
 # boring or weird:
 f4.plot("R")
@@ -404,7 +413,7 @@ for(c in c("GM12878", "H1 hESC", "K562")){
 }
 
 ## Supplementary figure: all tests:
-#pdf("~/hvl/ice/plots/s11_allBeans.pdf", 9, 12)
+pdf("figures/suppl/s7_allBeans.pdf", 9, 12)
 ggplot(pF, aes(x=flip, y=olap, fill=flip,
                group=interaction(flip,type,feature,ct), ymax=0)) +
   scale_fill_brewer(palette="Blues") +
@@ -415,44 +424,6 @@ ggplot(pF, aes(x=flip, y=olap, fill=flip,
   facet_grid(feature~ct+type, scales="free_y") + theme_bw() +
   labs(list(y="Annotation coverage per Mb (kb)", x="",
             fill="Flipped state")) + theme(legend.position="none")
-#dev.off()
+dev.off()
 
-
-## Investigate specific regions
-
-enhancers <- pF[pF$feature == "E",]
-enhancers <- enhancers[order(enhancers$olap, decreasing=T),]
-i <- as.character(head(enhancers[!grepl("none|closed", enhancers$id),], 60)$id)
-
-bins <- data.frame()
-for( d in paste0(c("g", "h", "k"), rep(c(".open.bed", ".closed.bed"),3))){
-  n <- read.table(paste0("~/hvl/ice/bedfiles/", d))
-  bins <- rbind(bins, n) 
-}
-
-bins <- bins[bins$V4 %in% i,]
-bins <- bins[match(i,bins$V4),]
-
-options(scipen=99)
-cat(paste0(bins[,1], ":", bins[,2] - 2e6, "-", bins[,3] + 2e6, "\n"))
-# Yes - interesting, use; N - HMM calls, don't use; U - uninteresting but could use;
-# YNNUU Y
-bins
-
-## get macthing eigs, filter those that aren't -, - vs. +
-bins[,c("h", "g", "k")] <- 0
-# for x in rows
-for (i in 1:nrow(bins)) {
-  bref <- paste0(bins[i,1] , "-", bins[i,2])
-  eig.index <- which(rownames(h.dat) == bref)
-  bins[i,5:7] <- c(h.dat[eig.index,1], g.dat[eig.index,1], k.dat[eig.index,1])
-}
-
-b <- cbind(bins, ucsc=paste0(bins[,1], ":", bins[,2] - 1.2e6, "-", bins[,3] + 1.2e6),
-              s=sign(bins$h * bins$g * bins$k))
-b <- b[b$s == 1,-ncol(b)]
-b$ct <- substr(b$V4, 1, 1)
-
-require("dplyr")
-as.data.frame(group_by(b, ct) %>% mutate(c=1:n()), 105)
-
+##########################################################################
