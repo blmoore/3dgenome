@@ -12,6 +12,11 @@ require("RColorBrewer")
 library("RHmm")
 library("scales")
 library("blmR")
+## External files required: boundaries/
+## Once boundaries are generated, build a bins file around each:
+##   python binAroundBed.py h_cb.bed 1500000 > h_cb_bins.bed
+## Then use these bins with bigWigAverageOverBed to bin all of the
+## bigWig files used in this work, i.e. 187 K562 vars, 115 Gm12878 etc.
 
 h.100k <- read.table("data/bedfiles/h100.bed")
 k.100k <- read.table("data/bedfiles/k100.bed")
@@ -60,7 +65,7 @@ write.bed(hb, "data/bedfiles/h_cb.bed")
 # Once this is done, use bigWigAverageOverBed with these bed files
 # and all the 34ish (-gc) features from ENCODE (.bigwig format).
 # Don't forget GC content! calc with (e.g.) :
-#   bedtools nuc -fi ../hg19.fa -bed gm_40kb_cb_bins.bed | cut -f-4,6-6 | sed '1d' > Gm12878_gc_40kb.gc
+#   bedtools nuc -fi <hg19.fa> -bed gm_40kb_cb_bins.bed | cut -f-4,6-6 | sed '1d' > Gm12878_gc_40kb.gc
 
 
 ## END compartments
@@ -98,11 +103,10 @@ procBounds <- function(b, ct=c("h1", "gm", "k5")){
   invisible()
 }
 
-
 # Load TAD calls
-h.b <- read.table("data/bedfiles/h1_allChr_tads.final")
-k.b <- read.table("data/bedfiles/k5_allChr_tads.final")
-g.b <- read.table("data/bedfiles/gm_allChr_tads.final")
+h.b <- read.table("data/text/h1.tads")
+k.b <- read.table("data/text/k5.tads")
+g.b <- read.table("data/text/gm.tads")
 
 procBounds(h.b, "h1")
 procBounds(k.b, "k5")
@@ -114,19 +118,14 @@ procBounds(g.b, "gm")
 ## End TADs
 
 buildBoundariesDat <- function(ct=c("H1hesc", "Gm12878", "K562"), 
-                               type=c("Compartments", "TADs", "Super")){
+                               type=c("Compartments", "TADs")){
   ## Combine TADs and boundaries into big dataframe
   if(type == "Compartments"){
-    dir <- "~/hvl/ice/boundaries/cluster/"
+    dir <- "boundaries/cluster/"
     steps <- 30
   } else {
-    if(type == "TADs"){
-      dir <- "~/hvl/ice/boundaries/cluster_tad/"
-      steps <- 25
-    } else {
-      dir <- "~/hvl/ice/boundaries/cluster_super/"
-      steps <- 30
-    }
+    dir <- "boundaries/cluster_tad/"
+    steps <- 25
   }
   
   fl <- paste0(dir, list.files(dir, pattern=paste0(".*", ct,".*")))
@@ -182,12 +181,8 @@ h.t <- buildBoundariesDat("H1hesc", "TADs")
 g.t <- buildBoundariesDat("Gm12878", "TADs")
 k.t <- buildBoundariesDat("K562", "TADs")
 
-# Super:
-#g.s <- buildBoundariesDat("Gm12878", "Super")
-
 gdf <- rbind(h.c, g.c, k.c, # comps
              h.t, g.t, k.t) # TADs
- #            g.s)
 
 # Colours for Fig. 5: TADs: blue; Compartments: red;
 col <- brewer.pal(5, "Blues")[-c(1,2)]
@@ -207,7 +202,7 @@ levels(caps) <- c("ATF3", "CEBP", "CHD1", "CHD2", "MYC", "CTCF",
 gdf$feat <- as.character(caps)
 
 ## Figure 5a: Selected average-o-grams for interesting features
-svg("~/hvl/ice/plots/f5a_boundaryEnrichmentProfiles_v3.svg", 7.36, 4.27)
+pdf("figures/f5a_boundaryEnrichmentProfiles.pdf", 7.36, 4.27)
 grid.arrange(
   ggplot(subset(gdf, type == "Compartments" & 
                   feat %in% c("CTCF", "H2A.Z", "YY1")),
@@ -220,7 +215,7 @@ grid.arrange(
     scale_x_continuous(breaks=c(1, 14, 30),
                        labels=c("-1.5 Mb", "Boundary", "+1.5 Mb")) +
     theme(axis.text.x = element_text(angle = 0, hjust = 1, vjust=0.5)) +
-    labs(list(x="", y="Normalised ChIP-seq signal relative to input",
+    labs(list(x="", y="",
               fill="Compartment\ncell type", col="Compartment\ncell type", 
               shape="Compartment\ncell type")) +
     scale_color_manual(values=col2) + scale_fill_manual(values=col2f) 
@@ -246,7 +241,7 @@ dev.off()
 
 
 ## All compartment boundaries, supplementary figure:
-pdf("~/hvl/ice/plots/supplementary/s6a_compartmentBoundaries_v2.pdf", 12, 12)
+pdf("figures/suppl/s10_compartmentBoundaries.pdf", 12, 12)
 ggplot(subset(gdf, type == "Compartments"),
        aes(x=pos, y=mean, ymin=means.l, ymax=means.u, 
            col=ct, fill=ct, shape=ct)) +
@@ -264,7 +259,7 @@ ggplot(subset(gdf, type == "Compartments"),
 dev.off()
 
 ## All TAD boundaries, supplementary figure:
-pdf("~/hvl/ice/plots/supplementary/s6a_tadBoundaries_v2.pdf", 12, 12)
+pdf("figures/suppl/s9_tadBoundaries.pdf", 12, 12)
 ggplot(subset(gdf, type == "TADs"), 
        aes(x=pos, y=mean, ymin=means.l, ymax=means.u, 
            col=ct, fill=ct, shape=ct, show_guide=F)) +
@@ -282,20 +277,6 @@ ggplot(subset(gdf, type == "TADs"),
   scale_colour_manual(values=c("#0000ff98", "#FFA50098", "#ff000098")) 
 dev.off()
 
-## Supers:
-# ggplot(subset(gdf, ct == "Gm12878"), aes(x=pos, y=mean, ymin=means.l, ymax=means.u, 
-#            col=type, fill=type,  shape=ct, show_guide=F)) +
-#   geom_ribbon(alpha=I(.3), aes(linetype=NA)) +
-#   facet_wrap(~feat, scale="free_y", ncol=5) + 
-#   geom_point() + geom_line() + theme_bw() +
-#   scale_x_continuous(breaks=c(1, 12, 25),
-#                      labels=c("-500 kb", "Boundary", "+500 kb")) +
-#   labs(list(x="", y="Normalised ChIP-seq signal relative to input per 40 kb bin",
-#             fill="Cell type", col="Cell type", shape="Cell type")) +
-#   ggtitle("TAD boundary feature enrichments") +
-#   scale_fill_manual(values=c("#0000ff48", "#FFA50048", "#ff000048")) +
-#   scale_colour_manual(values=c("#0000ff98", "#FFA50098", "#ff000098")) 
-
 ## To test, need (row-wise) counts per position per feature!
 buildBoundariesFull <- function(ct=c("H1hesc", "Gm12878", "K562"), 
                                type=c("Compartments", "TADs")){
@@ -303,13 +284,8 @@ buildBoundariesFull <- function(ct=c("H1hesc", "Gm12878", "K562"),
     dir <- "~/hvl/ice/boundaries/cluster/"
     steps <- 30
   } else {
-    if(type == "TADs"){
-      dir <- "~/hvl/ice/boundaries/cluster_tad/"
-      steps <- 25
-    } else {
-      dir <- "~/hvl/ice/boundaries/cluster_super/"
-      steps <- 30
-    }
+    dir <- "~/hvl/ice/boundaries/cluster_tad/"
+    steps <- 25
   }
   
   fl <- paste0(dir, list.files(dir, pattern=paste0(".*", ct,".*")))
@@ -371,12 +347,6 @@ comp.t <- group_by(full.t, ct, type, feat) %.%
             edge.mean  = mean(c(X1, X2, X3, X4, X5, X25, X24, X23, X22, X21)),
             p = wilcox.test(X12, c(X1, X2, X3, X4, X5, X25, X24, X23, X22, X21))$p.value)
 
-# gs.full <- buildBoundariesFull("Gm12878", "Super")
-# comp.s <- group_by(gs.full, ct, type, feat) %.% 
-#   summarise(bound.mean = mean(X12),
-#             edge.mean  = mean(c(X1, X2, X3, X4, X5, X25, X24, X23, X22, X21)),
-#             p = wilcox.test(X12, c(X1, X2, X3, X4, X5, X25, X24, X23, X22, X21))$p.value)
-
 comp <- rbind(comp.p, comp.t)
 
 # Proper nomenclature, caps:
@@ -391,7 +361,7 @@ levels(caps2) <- c("ATF3", "CEBP", "CHD1", "CHD2", "MYC", "CTCF",
 comp$feat <- as.character(caps2)
 
 ## Figure 5b; Bubble plot of p-value vs. features, scaled by effect size
-pdf("~/hvl/ice/plots/f5b_boundaryEnrichmentBubble_v2.pdf", 9, 5)
+pdf("figures/f5b_boundaryEnrichmentBubble.pdf", 9, 5)
 ggplot(comp, aes(x=feat, y=-log10(p), col=type,
                    size=abs(bound.mean - edge.mean))) +
   facet_grid(ct~., scales="free_y") + 
@@ -405,28 +375,3 @@ ggplot(comp, aes(x=feat, y=-log10(p), col=type,
   geom_hline(yintercept=-log10(.01 / 297), linetype="dashed") +
   scale_colour_brewer(type="qual", palette=6) 
 dev.off()
-
-
-## Super boundaries
-g.cb <- read.table("~/hvl/ice/boundaries/g_cb.bed")
-g.tb <- read.table("~/hvl/ice/boundaries/gm_tbounds.bed")
-
-g.tb <- paste0(g.tb[,1], "-", g.tb[,2])
-g.cb <- paste0(g.cb[,1], "-", g.cb[,2])
-
-diffs <- c()
-for( c in paste0("chr", c(1:22, "X")) ){
-  ctb <- g.tb[g.tb[,1] == c,]
-  ccb <- g.cb[g.cb[,1] == c,]
-  diff <- unlist(sapply(ccb[,2], function(j) min(abs(j - ctb[,2]))))
-  diffs <- c(diffs, diff)
-}
-
-plot(density(diffs))
-length(diffs[diffs < 4e4]) / length(diffs)
-g.supers <- gcb[which(diffs < 4e4),]
-
-write.table(g.supers, file="~/hvl/ice/boundaries/g_sb.bed", quote=F, row.names=F, col.names=F)
-
-
-
