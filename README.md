@@ -9,7 +9,7 @@ Full instructions on how to run, input files etc. will follow...
 
 ## blmR
 
-These scripts rely on an ad-hoc R package I've written called "blmR". To install, use the `devtools` package:
+These scripts rely on an _ad hoc_ R package I've written called "blmR". To install, use the `devtools` package:
 
 ```r
 devtools::install_github("blmR", "blmoore")
