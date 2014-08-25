@@ -12,6 +12,10 @@ library("snow")
 library("blmR")
 set.seed(42)
 
+g.dat <- readRDS("data/rds/Gm12878_35Vars.rds")
+h.dat <- readRDS("data/rds/H1hesc_35Vars.rds")
+k.dat <- readRDS("data/rds/K562_35Vars.rds")
+
 ## Bootstrapped heirarchical clustering to estimate
 ## the significance (according to persistance across
 ## subsamples) of observed clusters.
