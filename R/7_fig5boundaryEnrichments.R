@@ -4,18 +4,18 @@
 # enrichment or depletion over the different boundary types. #
 ##############################################################
 library("dplyr")
-library("plotrix")
 library("ggplot2")
 require("gridExtra")
-library("scales")
+library("naturalsort")
+library("plotrix")
 require("RColorBrewer")
 library("RHmm")
-library("naturalsort")
-source("~/hvl/R/hvl.R")
+library("scales")
+library("blmR")
 
-h.100k <- read.table("~/hvl/ice/h100.bed")
-k.100k <- read.table("~/hvl/ice/k100.bed")
-g.100k <- read.table("~/hvl/ice/g100.bed")
+h.100k <- read.table("data/bedfiles/h100.bed")
+k.100k <- read.table("data/bedfiles/k100.bed")
+g.100k <- read.table("data/bedfiles/g100.bed")
 
 h.100k$states <- callStates(h.100k[,6])$state
 k.100k$states <- callStates(k.100k[,6])$state
@@ -39,12 +39,17 @@ callCBounds <- function(sfile){
   return(outbed)
 }
 
+write.bed <- function(bed, file)
+  write.table(bed, file, quote=F, row.names=F, 
+              col.names=F, sep="\t")
+
 kb <- callCBounds(k.100k)
 gb <- callCBounds(g.100k)
 hb <- callCBounds(h.100k)
-write.bed(kb, "~/hvl/ice/boundaries/k_cb.bed")
-write.bed(gb, "~/hvl/ice/boundaries/g_cb.bed")
-write.bed(hb, "~/hvl/ice/boundaries/h_cb.bed")
+
+write.bed(kb, "data/bedfiles/k_cb.bed")
+write.bed(gb, "data/bedfiles/g_cb.bed")
+write.bed(hb, "data/bedfiles/h_cb.bed")
 
 # Now need to generate bins around these boundaries. This is done 
 # via binAroundBed.py, i.e.:
@@ -88,16 +93,16 @@ procBounds <- function(b, ct=c("h1", "gm", "k5")){
   options(scipen=999)
   bed.df <- data.frame(chr=tad.b$chr, start=new.start,
                        end=new.end, id=paste0(tad.b$chr, "-", new.start))
-  write.table(bed.df, file=paste0("~/hvl/ice/tads/", ct, "_tbounds.bed"), quote=F, 
+  write.table(bed.df, file=paste0("data/bedfiles/", ct, "_tbounds.bed"), quote=F, 
               row.names=F, col.names=F, sep="\t")
   invisible()
 }
 
 
 # Load TAD calls
-h.b <- read.table("~/hvl/ice/tads/h1_allChr_tads.final")
-k.b <- read.table("~/hvl/ice/tads/k5_allChr_tads.final")
-g.b <- read.table("~/hvl/ice/tads/gm_allChr_tads.final")
+h.b <- read.table("data/bedfiles/h1_allChr_tads.final")
+k.b <- read.table("data/bedfiles/k5_allChr_tads.final")
+g.b <- read.table("data/bedfiles/gm_allChr_tads.final")
 
 procBounds(h.b, "h1")
 procBounds(k.b, "k5")

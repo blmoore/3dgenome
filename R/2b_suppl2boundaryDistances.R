@@ -115,6 +115,7 @@ comp.dist <- function(tb, k, g, r){
 }
 
 ## 1) TADs:
+## These boundaries are generated in 7_*.R
 htb <- read.table("data/bedfiles/h1_tadbounds.bed")
 ktb <- read.table("data/bedfiles/k5_tadbounds.bed")
 gtb <- read.table("data/bedfiles/gm_tadbounds.bed")
