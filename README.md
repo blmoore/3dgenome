@@ -10,4 +10,6 @@ blmR
 
 These scripts rely on an R package I've written called "blmR". To install, use the `devtools` package:
 
-    devtools::install_github("blmR", "blmoore")
+```r
+devtools::install_github("blmR", "blmoore")
+```
