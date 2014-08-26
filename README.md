@@ -39,10 +39,10 @@ Lots of commonly-installed R packages are also used, including but not limited t
 ## External programs
 
 * `bedtools`
-* `bigWigAverageOverBed`^
-* `ICE`^
+* `bigWigAverageOverBed`<sup>*</sup>
+* `ICE`<sup>*</sup>
 
-^ To generate new input files, otherwise not required
+<sup>*</sup> To generate new input files, otherwise not required
 
 ## Raw data
 
