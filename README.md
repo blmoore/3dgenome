@@ -46,7 +46,12 @@ Lots of commonly-installed R packages are also used, including but not limited t
 
 ## Raw data
 
-Serialised rds data files are provided under [`data/rds`](data/rds). These were built from ENCODE uniformly processed .bigWig files, a fill list of which is available [here](http://www.broadinstitute.org/~anshul/projects/encode/rawdata/signal/mar2012/pooledReps/bigwig/macs2signal/foldChange/). These files come from the May/June 2012 data freeze and use MACS2 to convert aligned ChIP-seq reads into a measure of "signal" relative to input chromatin background. For instructions on usage and citation of these files, see [this page](](https://sites.google.com/site/anshulkundaje/projects/modencode).
+Serialised rds data files are provided under [`data/rds`](data/rds). These were built from ENCODE uniformly processed .bigWig files which are currently hosted  [here](http://www.broadinstitute.org/~anshul/projects/encode/rawdata/signal/mar2012/pooledReps/bigwig/macs2signal/foldChange/). These files come from the May/June 2012 data freeze and use MACS2 to convert aligned ChIP-seq reads into a measure of "signal" relative to input chromatin background. For instructions on usage and citation of these files, see [this page](https://sites.google.com/site/anshulkundaje/projects/modencode).
+
+Some of the scripts rely on other large files not included in this repository (in order to reanalyse data from scratch), but reasonable intermediates are provided where possible and stored under [`data/`](data/). For notes on which scripts are effected, see the [how to run](https://github.com/blmoore/3dgenome#how-to-run) section of this README.
+
+## How to run
+
 
 ## sessionInfo()
 
