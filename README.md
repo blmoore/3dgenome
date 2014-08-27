@@ -46,7 +46,7 @@ Lots of commonly-installed R packages are also used, including but not limited t
 
 ## Raw data
 
-Serialised rds data files are provided under [`data/rds`](data/rds). These were built from ENCODE uniformly processed .bigWig files which are available to download [here](http://encodedcc.sdsc.edu/ftp/modENCODE_VS_ENCODE/Regulation/Human/signal/foldChange/) (full list of files used will be added to the repository). These files come from the July 2012 data freeze and use MACSv2 to convert aligned ChIP-seq reads into a measure of "signal" relative to input chromatin background. For instructions on usage and citation of these files, see [Boyle _et al._ (2014)](http://www.nature.com/nature/journal/v512/n7515/full/nature13668.html).
+Serialised rds data files are provided under [`data/rds`](data/rds). These were built from ENCODE uniformly processed .bigWig files which are available to download [here](http://encodedcc.sdsc.edu/ftp/modENCODE_VS_ENCODE/Regulation/Human/signal/foldChange/) (full list of files used will be added to the repository). These files (used in [Boyle _et al._ (2014)](http://www.nature.com/nature/journal/v512/n7515/full/nature13668.html)) come from the July 2012 data freeze and use MACSv2 to convert aligned ChIP-seq reads into a measure of "signal" relative to input chromatin background.
 
 Some of the scripts rely on other large files not included in this repository (in order to reanalyse data from scratch), but reasonable intermediates are provided where possible and stored under [`data/`](data/). For notes on which scripts are effected, see the [how to run](https://github.com/blmoore/3dgenome#how-to-run) section of this README.
 
