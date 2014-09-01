@@ -95,6 +95,11 @@ Scripts are numbered in the order of which they should be run.
 
 Builds a tidy `data.frame` in the format: {**Y**, **x**_1, **x**_2, ..., **x**_n} where **Y** is a vector of values to be predicted (compartment eigenvector profiles in this instance) and each **x** is a numeric vector input feature. Here each cell represents an averaged feature (fold-change relative to input chromatin) over 1 Mb.
 
+This script generates two sets of `.rds` data files under [`data/`]:
+
+* `cellType_XVars.rds` - the aforementioned `data.frame` containing input features and empirical independent variable data.
+* `cellType_XVars_RFmod.rds` - the Random Forest regression model for the respective `data.frame`.
+
 ## sessionInfo()
 
 Below is an output of sessionInfo() for troubleshooting purposes, some loaded packages may not be required and likewise, some required packages may not be loaded.
