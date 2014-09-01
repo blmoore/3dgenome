@@ -52,6 +52,29 @@ Some of the scripts rely on other large files not included in this repository (i
 
 ## How to run
 
+First clone the repository (warning: ~250 MB total) and enter the directory:
+
+    git clone https://github.com/blmoore/3dgenome
+    cd 3dgenome
+
+Now many scripts can be run as-is, i.e.:
+
+```shell
+> Rscript R/0_buildDatFiles.R 
+
+Use all variables is set to:  FALSE 
+
+Reading in files... 
+
+[1] "HaibTfbsH1hescAtf3V0416102AlnRep0"
+[1] "SydhTfbsH1hescCebpbIggrabAlnRep0"
+[1] "BroadHistoneH1hescChd1a301218aStdAlnRep0"
+[1] "SydhTfbsH1hescChd2IggrabAlnRep0"
+[1] "OpenChromChipH1hescCmycAlnRep1"
+```
+
+Scripts are numbered in the order of which they should be run.
+
 
 ## sessionInfo()
 
