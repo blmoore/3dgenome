@@ -7,6 +7,8 @@ Full instructions on how to run, input files etc. will follow...
 
 # Dependencies
 
+A pre-built docker container with all required dependencies will be made available.
+
 ## blmR
 
 These scripts rely on an _ad hoc_ R package I've written called "blmR". To install, use the `devtools` package:
