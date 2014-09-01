@@ -91,7 +91,7 @@ Tree |      MSE  %Var(y) |
 
 Scripts are numbered in the order of which they should be run.
 
-### 0_buildDatFiles.R
+#### 0_buildDatFiles.R
 
 Builds a tidy `data.frame` in the format: {**Y**, **x**_1, **x**_2, ..., **x**_n} where **Y** is a vector of values to be predicted (compartment eigenvector profiles in this instance) and each **x** is a numeric vector input feature. Here each cell represents an averaged feature (fold-change relative to input chromatin) over 1 Mb.
 
