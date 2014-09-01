@@ -25,12 +25,10 @@ Lots of commonly-installed R packages are also used, including but not limited t
 
 * `caret`
 * `dplyr` 
-* `ggplot2`
+* `ggplot2` (w/ dependencies `reshape2`, `scales`, `RColorBrewer` etc.)
 * `gridExtra`
 * `plotrix`
 * `randomForest`
-* `RColorBrewer`
-* `reshape2`
 * `RHmm`
 
 ### Bioconductor
