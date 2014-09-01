@@ -59,8 +59,10 @@ First clone the repository (warning: ~250 MB total) and enter the directory:
 
 Now many scripts can be run as-is, i.e.:
 
-```shell
+```bash
 > Rscript R/0_buildDatFiles.R 
+
+# output follows...
 
 Use all variables is set to:  FALSE 
 
