@@ -7,7 +7,7 @@ Full instructions on how to run, input files etc. will follow...
 
 # Dependencies
 
-A pre-built docker container with all required dependencies will be made available.
+A pre-built docker container with all required dependencies will be made available, but the below dependencies should all be straightforward to install. Scripts should run on OS X and other Unix-based systems.
 
 ## blmR
 
