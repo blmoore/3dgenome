@@ -54,8 +54,10 @@ Some of the scripts rely on other large files not included in this repository (i
 
 First clone the repository (warning: ~250 MB total) and enter the directory:
 
-    git clone https://github.com/blmoore/3dgenome
-    cd 3dgenome
+```bash
+git clone https://github.com/blmoore/3dgenome
+cd 3dgenome
+```
 
 Now many scripts can be run as-is, i.e.:
 
