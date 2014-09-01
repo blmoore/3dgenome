@@ -76,6 +76,17 @@ Reading in files...
 [1] "SydhTfbsH1hescChd2IggrabAlnRep0"
 [1] "OpenChromChipH1hescCmycAlnRep1"
 [1] ...
+
+
+Building Random Forest...
+
+     |      Out-of-bag   |
+Tree |      MSE  %Var(y) |
+  25 | 0.005201    35.61 |
+  50 | 0.004946    33.87 |
+  75 | 0.004833    33.09 |
+ 100 | 0.004842    33.15 |
+ ...
 ```
 
 Scripts are numbered in the order of which they should be run.
