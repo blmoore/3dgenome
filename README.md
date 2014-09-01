@@ -75,6 +75,7 @@ Reading in files...
 [1] "BroadHistoneH1hescChd1a301218aStdAlnRep0"
 [1] "SydhTfbsH1hescChd2IggrabAlnRep0"
 [1] "OpenChromChipH1hescCmycAlnRep1"
+[1] ...
 ```
 
 Scripts are numbered in the order of which they should be run.
