@@ -76,7 +76,7 @@ grid.arrange(
 )
 dev.off()
 
-pdf("~/hvl/ice/plots/f1_chr2.pdf", 3, 7)
+pdf("figures/f1_chr2.pdf", 3, 7)
 ggplot(subset(eigens, chr == "chr2"), 
        aes(x=pos/1000000, y=eig*-1, group=ct, col=ct)) + 
   facet_wrap(~chr, nrow=1) + geom_line() + coord_flip() + 
