@@ -168,6 +168,11 @@ writeEigBed <- function(dat, fn){
   write.table(df, file=fn, quote=F, row.names=F, col.names=F, sep="\t")
 }
 
+# Read in your newly-generated files
+h.dat <- readRDS("data/rds/H1hesc_35Vars.rds")
+g.dat <- readRDS("data/rds/Gm12878_35Vars.rds")
+k.dat <- readRDS("data/rds/K562_35Vars.rds")
+
 writeEigBed(h.dat, "data/bedfiles/h1_eigs.bed")
 writeEigBed(g.dat, "data/bedfiles/gm_eigs.bed")
 writeEigBed(k.dat, "data/bedfiles/k5_eigs.bed")
