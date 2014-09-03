@@ -115,7 +115,7 @@ Compares boundaries for compartments and TADs across cell types and tests the si
 
 #### 3_fig2ModelResults.R
 
-Plots Random Forest modelling results per cell type as three separate plots (['f2_gmRes.pdf`](figures/f2_gmRes.pdf), [`f2_h1Res.pdf`](figures/f2_h1Res.pdf) and [`f2_k5Res.pdf`](figures/f2_gmRes.pdf)). Also calculates variable importance per model and plots a summary of the top ten ([`f2b_varImpPerModel.pdf`](figures/f2b_varImpPerModel.pdf)). Combining these plots gives **figure 2** in the manuscript.
+Plots Random Forest modelling results per cell type as three separate plots ([`f2_gmRes.pdf`](figures/f2_gmRes.pdf), [`f2_h1Res.pdf`](figures/f2_h1Res.pdf) and [`f2_k5Res.pdf`](figures/f2_gmRes.pdf)). Also calculates variable importance per model and plots a summary of the top ten ([`f2b_varImpPerModel.pdf`](figures/f2b_varImpPerModel.pdf)). Combining these plots gives **figure 2** in the manuscript.
 
 ## sessionInfo()
 
