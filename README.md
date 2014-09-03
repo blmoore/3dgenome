@@ -104,7 +104,7 @@ This script generates two sets of `.rds` data files under [`data/`](data/rds):
 
 Plots genome-wide compartment profiles for each cell type under study. The resulting figures make up part of **figure 1** ([`figures/f1_chr2.pdf`](figures/f1_chr2.pdf)) and supplementary figure 1 ([`figures/suppl/s1_GenomewideWigglePlots.pdf`](figures/suppl/s1_GenomewideWigglePlots.pdf)).
 
-#### 2_Fig1TADsDiagram.R
+#### 2_fig1TADsDiagram.R
 
 Generates detailed view of a ~22 Mb region of chromosome 2, indicating conservation of higher order genome organisation at multiple levels. Plots ['figures/f1_ZoomedRegion.pdf`](figures/f1_ZoomedRegion.pdf) which makes up the second half of **figure 1** in the manuscript.
 
