@@ -11,6 +11,9 @@ library("stats")
 library("blmR")
 set.seed(42)
 
+h.dat <- readRDS("data/rds/H1hesc_35Vars.rds")
+g.dat <- readRDS("data/rds/Gm12878_35Vars.rds")
+k.dat <- readRDS("data/rds/K562_35Vars.rds")
 csizes <- read.table("data/text/hg19.chrom.sizes.txt")
 
 rand.tads <- function(intb){
