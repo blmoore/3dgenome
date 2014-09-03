@@ -5,8 +5,12 @@
 # bar chart ranking variable importance (with estimate  #
 # of variability estimated by K-fold cross validation.  #
 #########################################################
-library("randomForest")
+library("randomForest", quietly=T)
 library("blmR")
+
+h.dat <- readRDS("data/rds/H1hesc_35Vars.rds")
+g.dat <- readRDS("data/rds/Gm12878_35Vars.rds")
+k.dat <- readRDS("data/rds/K562_35Vars.rds")
 
 # We've already calculated + plotted OOB prediction results 
 # in the script: 0_buildDatfiles.R, first look at OOB var imp
@@ -17,6 +21,7 @@ k.mod <- readRDS("data/rds/K562_35Vars_RFmod.rds")
 ## Fig 2a, model predictive accuracy per cell type. Note 
 ## these can't be combined on plot device with mfrow etc.
 ## due to the complicated layout() used to add side densities.
+cat("Drawing: f2_<ct>Res.pdf (3 plots)\n")
 pdf("figures/f2_gmRes.pdf", 6, 6)
 plotPredRes(x=g.mod$predicted, y=g.dat$eigen,
                 col="blue", ct="GM12878", scale.factor=.8)
@@ -49,7 +54,8 @@ impBars <- function(mod, ...){
   barplot(rev(imp[1:10]), horiz=T, las=1, cex.names=1.5, ...)
 }
 
-pdf("figures/f2b_varImpPerModel_v2.pdf", 9, 3.5)
+cat("Drawing: figures/f2b_varImpPerModel.pdf\n")
+pdf("figures/f2b_varImpPerModel.pdf", 9, 3.5)
 par(mfrow=c(1,3), mar=c(3,7,1.5,0.5), oma=c(2,0,0,0), mgp=c(0,.5,0))
 impBars(g.mod, main="GM12878", col="#0000ff92", border=NA)
 impBars(h.mod, main="H1 hESC", col="#FFA50092", border=NA)  
