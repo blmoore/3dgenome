@@ -100,6 +100,10 @@ This script generates two sets of `.rds` data files under [`data/`](data/rds):
 * `cellType_XVars.rds` - the aforementioned `data.frame` containing input features and empirical independent variable data.
 * `cellType_XVars_RFmod.rds` - the Random Forest regression model for the respective `data.frame`.
 
+#### 1_fig1CompartmentProfiles.R
+
+Plots genome-wide compartment profiles for each cell type under study. The resulting figures make up part of Figure 1 ([`figures/f1_chr2.pdf`](figures/f1_chr2.pdf)) and supplementary figure 1 ([`figures/suppl/s1_GenomewideWigglePlots.pdf`](figures/suppl/s1_GenomewideWigglePlots.pdf)).
+
 ## sessionInfo()
 
 Below is an output of sessionInfo() for troubleshooting purposes, some loaded packages may not be required and likewise, some required packages may not be loaded.
