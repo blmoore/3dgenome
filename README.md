@@ -24,6 +24,7 @@ Lots of commonly-installed R packages are also used, including but not limited t
 ### CRAN
 
 * `caret`
+* `corrgram`
 * `dplyr` 
 * `ggplot2` (w/ dependencies `reshape2`, `scales`, `RColorBrewer` etc.)
 * `gridExtra`
@@ -108,9 +109,14 @@ Plots genome-wide compartment profiles for each cell type under study. The resul
 
 Generates detailed view of a ~22 Mb region of chromosome 2, indicating conservation of higher order genome organisation at multiple levels. Plots [`figures/f1_ZoomedRegion.pdf`](figures/f1_ZoomedRegion.pdf) which makes up the second half of **figure 1** in the manuscript.
 
+#### 2b_suppl2boundaryDistances.R
+
+Compares boundaries for compartments and TADs across cell types and tests the significance of observed relationships. Plots supplementary figure 2 in two parts: [`2a`](figures/suppl/s2a_boundsEcdf.pdf) amd [`2b`](figures/suppl/s2b_compartmentCorrgram.pdf).
+(***N.B.*** works with `corrgram v1.6`).
+
 ## sessionInfo()
 
-Below is an output of sessionInfo() for troubleshooting purposes, some loaded packages may not be required and likewise, some required packages may not be loaded.
+Below is an output of sessionInfo() for troubleshooting purposes, some loaded packages may not be required and likewise, some required packages may not be loaded. An exception caused by attached packages is likely due to version issues.
 
 ```r
 R version 3.1.1 (2014-07-10)
@@ -127,7 +133,7 @@ other attached packages:
  [7] IRanges_1.22.10      BiocGenerics_0.10.0  dplyr_0.2            data.table_1.9.2     RHmm_2.0.3           nlme_3.1-117        
 [13] plyr_1.8.1           blmR_0.1             RColorBrewer_1.0-5   infotheo_1.2.0       ROCR_1.0-5           gplots_2.14.1       
 [19] calibrate_1.7.2      randomForest_4.6-10  caret_6.0-30         lattice_0.20-29      gridExtra_0.9.1      ggplot2_1.0.0       
-[25] fGarch_3010.82       fBasics_3010.86      MASS_7.3-33          timeSeries_3010.97   timeDate_3010.98     corrgram_1.5        
+[25] fGarch_3010.82       fBasics_3010.86      MASS_7.3-33          timeSeries_3010.97   timeDate_3010.98     corrgram_1.6        
 [31] seriation_1.0-13     reshape2_1.4         R.matlab_3.0.1       plotrix_3.5-7        scales_0.2.4        
 
 loaded via a namespace (and not attached):
