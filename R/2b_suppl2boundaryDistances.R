@@ -177,5 +177,5 @@ corrgram(data.frame(GM12878  = g.dat$eigen,
                     K562     = k.dat$eigen),
          lower.panel = panel.pts2, pch = 20,
          upper.panel = panel.conf,
-         diag.panel  = panel.density)
+         diag.panel  = panel.density, lty=1)
 dev.off()
