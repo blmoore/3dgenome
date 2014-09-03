@@ -111,8 +111,7 @@ Generates detailed view of a ~22 Mb region of chromosome 2, indicating conservat
 
 #### 2b_suppl2boundaryDistances.R
 
-Compares boundaries for compartments and TADs across cell types and tests the significance of observed relationships. Plots supplementary figure 2 in two parts: [`2a`](figures/suppl/s2a_boundsEcdf.pdf) amd [`2b`](figures/suppl/s2b_compartmentCorrgram.pdf).
-(***N.B.*** works with `corrgram v1.6`).
+Compares boundaries for compartments and TADs across cell types and tests the significance of observed relationships. Plots supplementary figure 2 in two parts: [`2a`](figures/suppl/s2a_boundsEcdf.pdf) and [`2b`](figures/suppl/s2b_compartmentCorrgram.pdf).
 
 ## sessionInfo()
 
