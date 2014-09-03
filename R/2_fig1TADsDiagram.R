@@ -89,6 +89,7 @@ drawTads <- function(di.file, tad.file, dat.file,
 }
 
 ## Zoom to 22Mb highlighted section:
+cat("Drawing: figures/f1_ZoomedRegion.pdf\n")
 pdf("figures/f1_ZoomedRegion.pdf", 6, 4.5)
 csome = "chr2"
 region = 1150:1600

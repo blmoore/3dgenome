@@ -8,11 +8,10 @@ library("ggplot2")
 library("gridExtra")
 library("reshape2")
 library("stats")
-source("~/hvl/R/hvl.R")
-load_all("blmR")
+library("blmR")
 set.seed(42)
 
-csizes <- read.table("~/hvl/hg19.chrom.sizes.txt")
+csizes <- read.table("data/text/hg19.chrom.sizes.txt")
 
 rand.tads <- function(intb){
   # null TADS, fit to this dist?:
@@ -140,6 +139,7 @@ compdf <- cbind(compdf, bound="Compartments")
 # 3) Graph both:
 bothdf <- rbind(taddf, compdf)
 options(scipen=999)
+cat("Drawing: figures/suppl/s2a_boundsEcdf.pdf\n")
 pdf("figures/suppl/s2a_boundsEcdf.pdf", 6, 3.5)
 ggplot(bothdf, aes(x=value+1, col=variable)) +
   stat_ecdf(geom="line", size=1.1) + scale_x_log10() +
@@ -167,7 +167,8 @@ ks.test(tdf$K562, tdf$Null)
 ks.test(cdf$K562, cdf$Null)
 
 ## Fig 2b: corrgram of eigenvector correlations:
-pdf("figures//suppl/s2b_compartmentCorrgram.pdf", 6, 6)
+cat("Drawing: figures/suppl/s2b_compartmentCorrgram.pdf\n")
+pdf("figures/suppl/s2b_compartmentCorrgram.pdf", 6, 6)
 corrgram(data.frame(GM12878  = g.dat$eigen,
                    `H1 hESC` = h.dat$eigen,
                     K562     = k.dat$eigen),
