@@ -22,14 +22,13 @@ for(k in unique(fill$chrs)){
   ps <- fill[fill$chrs == k, 2]
   o <- seq(min(ps), max(ps), 1e6)
   if(length(o) == length(ps)){
-    cat(k, " OK\n")
+    #cat(k, " OK\n")
+     invisible()
   } else {
-    cat(k, " Missing\n")
+    #cat(k, " Missing\n")
     missing <- rbind(missing, cbind(as.character(k), o[!o %in% ps]))
   }
 }
-
-missing
 
 # Messy way of adding NAs for geom_line to not connext over 
 # centromeres, unmappable regions, poorly covered by Hi-C etc.
@@ -58,6 +57,7 @@ eigens$chr <- factor(eigens$chr, levels=paste0("chr", c(1:22, "X")))
 bigcs <- eigens[eigens$chr %in% paste0("chr", 1:11),]
 smallc <- eigens[!eigens$chr %in% paste0("chr", 1:11),]
 
+cat("Drawing: figures/suppl/s1_GenomewideWigglePlots.pdf\n")
 pdf("figures/suppl/s1_GenomewideWigglePlots.pdf", 8, 10)
 grid.arrange(
   ggplot(bigcs, aes(x=pos/1000000, y=eig, group=ct, col=ct)) + 
@@ -76,6 +76,7 @@ grid.arrange(
 )
 dev.off()
 
+cat("Drawing: figures/f1_chr2.pdf\n")
 pdf("figures/f1_chr2.pdf", 3, 7)
 ggplot(subset(eigens, chr == "chr2"), 
        aes(x=pos/1000000, y=eig*-1, group=ct, col=ct)) + 
