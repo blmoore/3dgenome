@@ -113,6 +113,10 @@ Generates detailed view of a ~22 Mb region of chromosome 2, indicating conservat
 
 Compares boundaries for compartments and TADs across cell types and tests the significance of observed relationships. Plots supplementary figure 2 in two parts: [`2a`](figures/suppl/s2a_boundsEcdf.pdf) and [`2b`](figures/suppl/s2b_compartmentCorrgram.pdf).
 
+#### 3_fig2ModelResults.R
+
+Plots Random Forest modelling results per cell type as three separate plots (['f2_gmRes.pdf`](figures/f2_gmRes.pdf), [`f2_h1Res.pdf`](figures/f2_h1Res.pdf) and [`f2_k5Res.pdf`](figures/f2_gmRes.pdf)). Also calculates variable importance per model and plots a summary of the top ten ([`f2b_varImpPerModel.pdf`](figures/f2b_varImpPerModel.pdf)). Combining these plots gives **figure 2** in the manuscript.
+
 ## sessionInfo()
 
 Below is an output of sessionInfo() for troubleshooting purposes, some loaded packages may not be required and likewise, some required packages may not be loaded. An exception caused by attached packages is likely due to version issues.
