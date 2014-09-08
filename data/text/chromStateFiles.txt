@@ -1,0 +1,3 @@
+http://ftp.ebi.ac.uk/pub/databases/ensembl/encode/integration_data_jan2011/byDataType/segmentations/jan2011/Combined_7_state/chromhmm.segway.gm12878.comb11.concord4.bed.gz
+http://ftp.ebi.ac.uk/pub/databases/ensembl/encode/integration_data_jan2011/byDataType/segmentations/jan2011/Combined_7_state/chromhmm.segway.h1hesc.comb11.concord4.bed.gz
+http://ftp.ebi.ac.uk/pub/databases/ensembl/encode/integration_data_jan2011/byDataType/segmentations/jan2011/Combined_7_state/chromhmm.segway.k562.comb11.concord4.bed.gz

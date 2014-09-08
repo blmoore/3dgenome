@@ -9,6 +9,11 @@ library("plotrix")
 library("blmR")
 options(scipen=999)
 
+# load previously-built models:
+g.mod <- readRDS("data/rds/Gm12878_35Vars_RFmod.rds")
+h.mod <- readRDS("data/rds/H1hesc_35Vars_RFmod.rds")
+k.mod <- readRDS("data/rds/K562_35Vars_RFmod.rds")
+# load featureset data.frames
 g.dat <- readRDS("data/rds/Gm12878_35Vars.rds")
 h.dat <- readRDS("data/rds/H1hesc_35Vars.rds")
 k.dat <- readRDS("data/rds/K562_35Vars.rds")

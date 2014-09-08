@@ -17,9 +17,9 @@ library("gridExtra")
 library("blmR")
 
 # To run this script you must download the following files:
-#  * chromhmm.segway.gm12878.comb11.concord4.bed.bed
-#  * chromhmm.segway.h1hesc.comb11.concord4.bed.bed
-#  * chromhmm.segway.k562.comb11.concord4.bed.bed
+#  * chromhmm.segway.gm12878.comb11.concord4.bed
+#  * chromhmm.segway.h1hesc.comb11.concord4.bed
+#  * chromhmm.segway.k562.comb11.concord4.bed
 # and place them under bedfiles/
 # These are the ENCODE combined chromatin state predictions
 # for ChromHMM + Segway, from the Jan 2011 data freeze. At 
@@ -27,9 +27,9 @@ library("blmR")
 # browser, and can also be downloaded from:
 #  http://ebi.edu.au/ftp/software/software/ensembl/encode/integration_data_jan2011/byDataType/segmentations/jan2011/Combined_7_state/
 
-if(!file.exists("data/bedfiles/chromhmm.segway.gm12878.comb11.concord4.bed.bed"))
+if(!file.exists("data/bedfiles/chromhmm.segway.gm12878.comb11.concord4.bed"))
   stop("No chromatin state file found at: 
-      \tdata/bedfiles/chromhmm.segway.gm12878.comb11.concord4.bed.bed \nCannot run.")
+      \tdata/bedfiles/chromhmm.segway.gm12878.comb11.concord4.bed \nCannot run.")
 
 g.dat <- readRDS("data/rds/Gm12878_35Vars.rds")
 h.dat <- readRDS("data/rds/H1hesc_35Vars.rds")
@@ -90,10 +90,10 @@ fnames <- c(paste0(c("h", "g", "k"), rep(c(".open.bed", ".closed.bed"), 3)), "no
 
 for(f in fnames){
   state.file <- ifelse(substr(f, 1, 1) == "h",
-                       "chromhmm.segway.h1hesc.comb11.concord4.bed.bed",
+                       "chromhmm.segway.h1hesc.comb11.concord4.bed",
                        ifelse(substr(f, 1, 1) == "g", 
-                              "chromhmm.segway.gm12878.comb11.concord4.bed.bed",
-                              "chromhmm.segway.k562.comb11.concord4.bed.bed"))
+                              "chromhmm.segway.gm12878.comb11.concord4.bed",
+                              "chromhmm.segway.k562.comb11.concord4.bed"))
   cmd <- paste0("bedtools intersect -a data/bedfiles/", f, " -b data/bedfiles/", 
                 state.file, " -wao > data/text/", f, "_isect.out")
   cat("Running: ", cmd, "\n")
@@ -132,11 +132,11 @@ f1 <- rbind(hf1, gf1, kf1)
 ## 3) Build subset of annotations that are preserved in all cell types (?)
 class.vec <- c("character", "numeric", "numeric", "character", "numeric", "character",
                "numeric", "numeric", "character")
-chrom.gm <- read.table("data/bedfiles/chromhmm.segway.gm12878.comb11.concord4.bed.bed",
+chrom.gm <- read.table("data/bedfiles/chromhmm.segway.gm12878.comb11.concord4.bed",
                        stringsAsFactors=F, colClasses=class.vec)
-chrom.h1 <- read.table("data/bedfiles/chromhmm.segway.h1hesc.comb11.concord4.bed.bed",
+chrom.h1 <- read.table("data/bedfiles/chromhmm.segway.h1hesc.comb11.concord4.bed",
                        stringsAsFactor=F, colClasses=class.vec)
-chrom.k5 <- read.table("data/bedfiles/chromhmm.segway.k562.comb11.concord4.bed.bed",
+chrom.k5 <- read.table("data/bedfiles/chromhmm.segway.k562.comb11.concord4.bed",
                        stringsAsFactors=F, colClasses=class.vec)
 
 c.gm <- with(chrom.gm, GRanges(V1, IRanges(start=V2, end=V3), "+", feat=V4))
