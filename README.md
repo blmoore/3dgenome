@@ -35,6 +35,7 @@ Lots of commonly-installed R packages are also used, including but not limited t
 * `gridExtra`
 * `naturalsort`
 * `plotrix`
+* `pvclust`
 * `randomForest`
 * `RHmm`
 
