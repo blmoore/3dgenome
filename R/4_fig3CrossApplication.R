@@ -46,13 +46,14 @@ cmat <- matrix(c(cor(gg, g.dat$eigen),
                byrow=T, nrow=3)
 rownames(cmat) <- colnames(cmat) <- c("GM12878", "H1 hESC", "K562")
 
+# Print cross-application results
 cmat
-100 * (cmat[1,1] - cmat[1,2]) / cmat[1,1] # 20.2% drop GM -> H1
-100 * (cmat[1,1] - cmat[1,3]) / cmat[1,1] # 7.8% drop GM -> K5
-100 * (cmat[2,2] - cmat[2,1]) / cmat[2,2] # 1.7% drop H1 -> GM
-100 * (cmat[2,2] - cmat[2,3]) / cmat[2,2] # 21.0% drop H1 -> K5
-100 * (cmat[3,3] - cmat[3,1]) / cmat[3,3] # 5.9% drop K5 -> GM
-100 * (cmat[3,3] - cmat[3,2]) / cmat[3,3] # 20.4% drop K5 -> H1
+# 100 * (cmat[1,1] - cmat[1,2]) / cmat[1,1] # 20.2% drop GM -> H1
+# 100 * (cmat[1,1] - cmat[1,3]) / cmat[1,1] # 7.8% drop GM -> K5
+# 100 * (cmat[2,2] - cmat[2,1]) / cmat[2,2] # 1.7% drop H1 -> GM
+# 100 * (cmat[2,2] - cmat[2,3]) / cmat[2,2] # 21.0% drop H1 -> K5
+# 100 * (cmat[3,3] - cmat[3,1]) / cmat[3,3] # 5.9% drop K5 -> GM
+# 100 * (cmat[3,3] - cmat[3,2]) / cmat[3,3] # 20.4% drop K5 -> H1
 
 xdat <- melt(t(cmat))
 colnames(xdat) <- c("Applied to", "Trained on", "Corr")
