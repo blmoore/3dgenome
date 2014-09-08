@@ -156,7 +156,7 @@ Reproducing figure 5 requires a lot of leg work, I am happy to send you intermed
 2. Generate a series of equally spaced bins around each one (Python script: [binAroundBed.py](py/binAroundBed.py))
 3. Use `bigWigAverageOverBed` to average all input features (~300 .bigWig files, maybe 200 GB of raw data) — ideally use a cluster for this
 
-This gives you a series of text files with intervals and averaged signal per bin, with which you can then text for enrichments over a boundary and plot figure 5 ([f5a](figures/f5a_boundaryEnrichmentProfiles.pdf), [f5b](figures/f5b_boundaryEnrichmentBubble.pdf)) as well as supplementary figures ([s9](figures/suppl/s9_tadBoundaries.pdf) and [s10](figures/suppl/s10_compartmentBoundaries.pdf)).
+This gives you a series of text files with intervals and averaged signal per bin, with which you can then test for enrichments per boundary and plot **figure 5** ([f5a](figures/f5a_boundaryEnrichmentProfiles.pdf), [f5b](figures/f5b_boundaryEnrichmentBubble.pdf)) as well as supplementary figures ([s9](figures/suppl/s9_tadBoundaries.pdf) and [s10](figures/suppl/s10_compartmentBoundaries.pdf)).
 
 ## sessionInfo()
 
