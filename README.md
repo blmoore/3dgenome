@@ -38,6 +38,7 @@ Lots of commonly-installed R packages are also used, including but not limited t
 * `pvclust`
 * `randomForest`
 * `RHmm`
+* `snow` (and `Rmpi`)
 
 ### Bioconductor
 
@@ -158,6 +159,10 @@ Reproducing figure 5 requires a lot of leg work, I am happy to send you intermed
 3. Use `bigWigAverageOverBed` to average all input features (~300 .bigWig files, maybe 200 GB of raw data) — ideally use a cluster for this
 
 This gives you a series of text files with intervals and averaged signal per bin, with which you can then test for enrichments per boundary and plot **figure 5** ([f5a](figures/f5a_boundaryEnrichmentProfiles.pdf), [f5b](figures/f5b_boundaryEnrichmentBubble.pdf)) as well as supplementary figures ([s9](figures/suppl/s9_tadBoundaries.pdf) and [s10](figures/suppl/s10_compartmentBoundaries.pdf)).
+
+#### 8_suppl10FeatureHeatmaps.R
+
+This generates a single figure in a resource-intensive, uninteresting way (probably a good one to skip). As written uses the `pvclust` R package to find "significant" clusters in the input features through multiscale bootstrap (if a cluster is stable through undersampled and oversample data, they reason, it's significantly more clustery than would be expected by chance --- give or take, read the docs). Parallelisation is achieved with `snow` and `Rmpi` running on an openmpi backend (4 threads), but by all means run it single-threaded if you so desire. In the final(ish) paper, these heatmaps became supplementary figure 4 (not 10 as the title suggests, TO FIX).
 
 ## sessionInfo()
 
