@@ -123,7 +123,11 @@ Performs cross-application of cell type specific models and generates a summary 
 
 #### 5_fig4aStratifyByVariability.R
 
-This script has a non-neglible runtime (~10 mins on a modern processor) but could easily be parallelised / optimised. This script splits the genome into equal-sized bins based on how variable chromatin structure is across the cell types under study. Then a model (as in script 3) is built per split, and the results compared ([`f4a`](figures/f4a_stratByVar.pdf)).
+This script has a non-neglible runtime (~10 mins on a modern processor) but could easily be parallelised / optimised. Here we're splitting the genome into an equal number of bins based on how variable chromatin structure is across the cell types under study. Then a model (as in script 3) is built per split, and the results compared ([`f4a`](figures/f4a_stratByVar.pdf)).
+
+#### 6_fig4bFlippedBoxplots.R
+
+**Requires external files**. To run this script you need to download the ENCODE predicted chromatin states form [here](http://ftp.ebi.ac.uk/pub/databases/ensembl/encode/integration_data_jan2011/byDataType/segmentations/jan2011/Combined_7_state/) (i.e. gzip archives for the three cell types being used). They should be unzipped and placed under `data/bedfiles/`.
 
 ## sessionInfo()
 
