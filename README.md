@@ -33,6 +33,7 @@ Lots of commonly-installed R packages are also used, including but not limited t
 * `dplyr` 
 * `ggplot2` (w/ dependencies `reshape2`, `scales`, `RColorBrewer` etc.)
 * `gridExtra`
+* `naturalsort`
 * `plotrix`
 * `randomForest`
 * `RHmm`
@@ -143,7 +144,7 @@ gunzip data/bedfiles/*.gz
 
 Also requires R package `RHmm`, which at the time of writing has been removed from CRAN. Download the newest available version from [the archive](http://cran.r-project.org/src/contrib/Archive/RHmm/) and install with e.g. `R CMD INSTALL <RHmm_2.0.0.tar.gz>`.
 
-Finally, this script also has the external dependancy **bedtools** which should be on your `$PATH`. Should be easy enough to install through your linux central repo (e.g. `apt-get install bedtools`) or via your OS X pkg manager of choice (`brew install bedtools`).
+Finally, this script also has the external dependancy **bedtools** which should be on your `$PATH`. Should be easy enough to install through your linux central repo (e.g. `apt-get install bedtools`) or via your OS X pkg manager of choice (`brew install bedtools`). bedtools may throw an "out of memory" exception if running on a machine with < approx. 4 GB RAM.
 
 The output of this script includes [`f4b`](figures/f4b_enhancerEnrichFlipped.pdf) as well as supplementary figures [`s6`](figures/suppl/s6_transcribedFlipped.pdf) and [`s7`](figures/suppl/s7_allBeans.pdf).
 
