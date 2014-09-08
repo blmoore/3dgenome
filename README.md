@@ -49,7 +49,7 @@ Lots of commonly-installed R packages are also used, including but not limited t
 
 * `bedtools`
 * `bigWigAverageOverBed`<sup>*</sup>
-* `ICE`<sup>*</sup>
+* `ICE` / [hiclib](http://mirnylab.bitbucket.org/hiclib)<sup>*</sup>
 
 <sup>*</sup> To generate new input files, otherwise not required
 
