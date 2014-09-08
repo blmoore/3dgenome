@@ -136,6 +136,10 @@ wget -P data/bedfiles/ -i data/text/chromStateFiles.txt
 gunzip data/bedfiles/*.gz
 ```
 
+Also requires R package `RHmm`, which at the time of writing has been removed from CRAN. Download the newest available version from [the archive](http://cran.r-project.org/src/contrib/Archive/RHmm/) and install with e.g.sudo apt-get inst `R CMD INSTALL <RHmm_2.0.0.tar.gz>`.
+
+Finally, this script also has the external dependancy **bedtools** which should be on your `$PATH`. Should be easy enough to install through your linux central repo (e.g. `apt-get install bedtools`) or via your OS X pkg manager of choice (`brew install bedtools`).
+
 ## sessionInfo()
 
 Below is an output of sessionInfo() for troubleshooting purposes, some loaded packages may not be required and likewise, some required packages may not be loaded. An exception caused by attached packages is likely due to version issues.
