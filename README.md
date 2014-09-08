@@ -117,6 +117,10 @@ Compares boundaries for compartments and TADs across cell types and tests the si
 
 Plots Random Forest modelling results per cell type as three separate plots ([`f2_gmRes.pdf`](figures/f2_gmRes.pdf), [`f2_h1Res.pdf`](figures/f2_h1Res.pdf) and [`f2_k5Res.pdf`](figures/f2_gmRes.pdf)). Also calculates variable importance per model and plots a summary of the top ten ([`f2b_varImpPerModel.pdf`](figures/f2b_varImpPerModel.pdf)). Combining these plots gives **figure 2** in the manuscript.
 
+#### 4_fig3CrossApplication.R
+
+Performs cross-application of cell type specific models and generates a summary plot ([`f3b_crossApplyBars.pdf`](figures/f3b_crossApplyBars.pdf)). Also plots a reciprocal example of cross application between two of the cell types (['f3ai`](figures/f3ai_gmXapplyK5.pdf) and [`f3aii`](figures/f3aii_k5XapplyGm.pdf)).
+
 ## sessionInfo()
 
 Below is an output of sessionInfo() for troubleshooting purposes, some loaded packages may not be required and likewise, some required packages may not be loaded. An exception caused by attached packages is likely due to version issues.
