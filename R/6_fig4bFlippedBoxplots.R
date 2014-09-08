@@ -371,18 +371,16 @@ pdf("figures/f4b_enhancerEnrichFlipped.pdf", 7, 5.5)
 f4.plot("E")
 dev.off()
 
-# interesting:
-f4.plot("WE")
-f4.plot("CTCF")
-f4.plot("TSS")
-
 pdf("figures/suppl/s6_transcribedFlipped.pdf", 7, 5.5)
 f4.plot("T")
 dev.off()
 
-# boring or weird:
-f4.plot("R")
-f4.plot("PF")
+# others not used in manuscript:
+#f4.plot("WE")
+#f4.plot("CTCF")
+#f4.plot("TSS")
+#f4.plot("R")
+#f4.plot("PF")
 
 # Open/closed vs. None wilcox tests
 cat("Cell type\tFlip\tType\tSignif\tMedian(flipped)\tMedian(none)\n")
