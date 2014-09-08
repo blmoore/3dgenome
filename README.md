@@ -3,7 +3,12 @@
 
 Scripts to recreate figures in paper: _Integrative modelling reveals the principles of multi-scale chromatin boundary formation in human nuclear organisation_ (2014, in preparation).
 
-Full instructions on how to run, input files etc. will follow...
+# Table of contents
+
+* [Dependencies](https://github.com/blmoore/3dgenome#dependencies)
+* [Raw data](https://github.com/blmoore/3dgenome#raw-data)
+* [How to run](https://github.com/blmoore/3dgenome#how-to-run)
+* [sessionInfo](https://github.com/blmoore/3dgenome#sessioninfo)
 
 # Dependencies
 
@@ -45,13 +50,13 @@ Lots of commonly-installed R packages are also used, including but not limited t
 
 <sup>*</sup> To generate new input files, otherwise not required
 
-## Raw data
+# Raw data
 
 Serialised rds data files are provided under [`data/rds`](data/rds). These were built from ENCODE uniformly processed .bigWig files which are available to download [from ENCODE](http://encodedcc.sdsc.edu/ftp/modENCODE_VS_ENCODE/Regulation/Human/signal/foldChange/) (list of filenames used [here](data/ENCODE_filelist.txt)). These files (used in [Boyle _et al._ (2014)](http://www.nature.com/nature/journal/v512/n7515/full/nature13668.html)) come from the July 2012 data freeze and use MACSv2 to convert aligned ChIP-seq reads into a measure of "signal" relative to input chromatin background.
 
 Some of the scripts rely on other large files not included in this repository (in order to reanalyse data from scratch), but reasonable intermediates are provided where possible and stored under [`data/`](data/). For notes on which scripts are effected, see the [how to run](https://github.com/blmoore/3dgenome#how-to-run) section of this README.
 
-## How to run
+# How to run
 
 First clone the repository (warning: ~250 MB total) and enter the directory:
 
