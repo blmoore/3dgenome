@@ -148,6 +148,16 @@ Finally, this script also has the external dependancy **bedtools** which should 
 
 The output of this script includes [`f4b`](figures/f4b_enhancerEnrichFlipped.pdf) as well as supplementary figures [`s6`](figures/suppl/s6_transcribedFlipped.pdf) and [`s7`](figures/suppl/s7_allBeans.pdf).
 
+#### 7_fig5boundaryEnrichments.R
+
+Reproducing figure 5 requires a lot of leg work, I am happy to send you intermediate files if you wish to run this script (ping me [on twitter](https://twitter.com/benjaminlmoore)). Comments within the Rscript explain what's needed but the essential steps are: 
+
+1. Call compartment and TAD boundaries 
+2. Generate a series of equally spaced bins around each one (Python script: [binAroundBed.py](py/binAroundBed.py))
+3. Use `bigWigAverageOverBed` to average all input features (~300 .bigWig files, maybe 200 GB of raw data) — ideally use a cluster for this
+
+This gives you a series of text files with intervals and averaged signal per bin, with which you can then text for enrichments over a boundary and plot figure 5 ([f5a](figures/f5a_boundaryEnrichmentProfiles.pdf), [f5b](figures/f5b_boundaryEnrichmentBubble.pdf)) as well as supplementary figures ([s9](figures/suppl/s9_tadBoundaries.pdf) and [s10](figures/suppl/s10_compartmentBoundaries.pdf)).
+
 ## sessionInfo()
 
 Below is an output of sessionInfo() for troubleshooting purposes, some loaded packages may not be required and likewise, some required packages may not be loaded. An exception caused by attached packages is likely due to version issues.
