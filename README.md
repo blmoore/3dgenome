@@ -146,7 +146,7 @@ Also requires R package `RHmm`, which at the time of writing has been removed fr
 
 Finally, this script also has the external dependancy **bedtools** which should be on your `$PATH`. Should be easy enough to install through your linux central repo (e.g. `apt-get install bedtools`) or via your OS X pkg manager of choice (`brew install bedtools`). bedtools may throw an "out of memory" exception if running on a machine with < approx. 4 GB RAM.
 
-The output of this script includes [`f4b`](figures/f4b_enhancerEnrichFlipped.pdf) as well as supplementary figures [`s6`](figures/suppl/s6_transcribedFlipped.pdf) and [`s7`](figures/suppl/s7_allBeans.pdf).
+The output of this script includes [`f4b`](figures/f4b_enhancerEnrichFlipped.pdf) as well as supplementary figures [`s6`](figures/suppl/s6_transcribedFlipped.pdf) and [`s7`](figures/suppl/s7_allBeans.pdf). Combine f4b with f4a (script 5) and you'll get **figure 4**.
 
 #### 7_fig5boundaryEnrichments.R
 
