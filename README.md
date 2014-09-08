@@ -129,9 +129,12 @@ This script has a non-neglible runtime (~10 mins on a modern processor) but coul
 
 **Requires external files**. To run this script you need to download the ENCODE predicted chromatin states from [here](http://ftp.ebi.ac.uk/pub/databases/ensembl/encode/integration_data_jan2011/byDataType/segmentations/jan2011/Combined_7_state/) (i.e. gzip archives for the three cell types being used). They should be unzipped and placed under `data/bedfiles/`, e.g.
 
-    wget -P data/bedfiles/ http://ftp.ebi.ac.uk/pub/databases/ensembl/encode/integration_data_jan2011/byDataType/segmentations/jan2011/Combined_7_state/chromhmm.segway.gm12878.comb11.concord4.bed.gz
-    gunzip data/bedfiles/chromhmm.segway.gm12878.comb11.concord4.bed.gz
-    # rinse, repeat for each cell type
+```bash
+# download bedfiles from ENCODE ftp (35 MB total)
+wget -P data/bedfiles/ -i data/text/chromStateFiles.txt
+# un-gzip archives
+gunzip data/bedfiles/*.gz
+```
 
 ## sessionInfo()
 
