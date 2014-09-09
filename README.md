@@ -98,7 +98,7 @@ Tree |      MSE  %Var(y) |
  ...
 ```
 
-Scripts are numbered in the order of which they should be run.
+Scripts are numbered in the order of which they should be run. You may wish to delete existing PDFs under `figures/` to convince yourself they're being regenerated (if not they'll be overwritten).
 
 #### 0_buildDatFiles.R
 
