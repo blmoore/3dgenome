@@ -164,6 +164,10 @@ This gives you a series of text files with intervals and averaged signal per bin
 
 This generates a single figure in a resource-intensive, uninteresting way (probably a good one to skip). As written uses the `pvclust` R package to find "significant" clusters in the input features through multiscale bootstrap (if a cluster is stable through undersampled and oversample data, they reason, it's significantly more clustery than would be expected by chance --- give or take, read the docs). Parallelisation is achieved with `snow` and `Rmpi` running on an openmpi backend (4 threads), but by all means run it single-threaded if you so desire. In the final(ish) paper, these heatmaps became supplementary figure 4 (not 10 as the title suggests, TO FIX).
 
+#### 9_additionalFigures.R
+
+Finally this script will plot the remaining supplementary figures: [`s3`](figures/s3_VarImpDifferences.pdf) and [`s5`](figures/s5_featureBoxplots.pdf).
+
 ## sessionInfo()
 
 Below is an output of sessionInfo() for troubleshooting purposes, some loaded packages may not be required and likewise, some required packages may not be loaded. An exception caused by attached packages is likely due to version issues.
