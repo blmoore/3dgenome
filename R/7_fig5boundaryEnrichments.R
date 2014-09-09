@@ -52,15 +52,15 @@ kb <- callCBounds(k.100k)
 gb <- callCBounds(g.100k)
 hb <- callCBounds(h.100k)
 
-write.bed(kb, "data/bedfiles/k_cb.bed")
-write.bed(gb, "data/bedfiles/g_cb.bed")
-write.bed(hb, "data/bedfiles/h_cb.bed")
+write.bed(kb, "data/bedfiles/k5_compartmentbounds.bed")
+write.bed(gb, "data/bedfiles/gm_compartmentbounds.bed")
+write.bed(hb, "data/bedfiles/h1_compartmentbounds.bed")
 
 # Now need to generate bins around these boundaries. This is done 
 # via binAroundBed.py, i.e.:
-#   python binAroundBed.py h_cb.bed 1500000 > h_cb_bins.bed
-#   python binAroundBed.py g_cb.bed 1500000 > g_cb_bins.bed
-#   python binAroundBed.py k_cb.bed 1500000 > k_cb_bins.bed
+#   python binAroundBed.py h_compartmentbounds.bed 1500000 > h_cb_bins.bed
+#   python binAroundBed.py g_compartmentbounds.bed 1500000 > g_cb_bins.bed
+#   python binAroundBed.py k_compartmentbounds.bed 1500000 > k_cb_bins.bed
 
 # Once this is done, use bigWigAverageOverBed with these bed files
 # and all the 34ish (-gc) features from ENCODE (.bigwig format).
@@ -98,7 +98,7 @@ procBounds <- function(b, ct=c("h1", "gm", "k5")){
   options(scipen=999)
   bed.df <- data.frame(chr=tad.b$chr, start=new.start,
                        end=new.end, id=paste0(tad.b$chr, "-", new.start))
-  write.table(bed.df, file=paste0("data/bedfiles/", ct, "_tbounds.bed"), quote=F, 
+  write.table(bed.df, file=paste0("data/bedfiles/", ct, "_tadbounds.bed"), quote=F, 
               row.names=F, col.names=F, sep="\t")
   invisible()
 }
