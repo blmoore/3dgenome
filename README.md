@@ -154,7 +154,7 @@ The output of this script includes [`f4b`](figures/f4b_enhancerEnrichFlipped.pdf
 
 Reproducing figure 5 requires a lot of leg work, I am happy to send you intermediate files if you wish to run this script (ping me [on twitter](https://twitter.com/benjaminlmoore)). Comments within the Rscript explain what's needed but the essential steps are: 
 
-1. Call compartment and TAD boundaries 
+1. Call compartment and TAD boundaries (or use those provided in [`data/bedfiles`](data/bedfiles))
 2. Generate a series of equally spaced bins around each one (Python script: [binAroundBed.py](py/binAroundBed.py))
 3. Use `bigWigAverageOverBed` to average all input features (~300 .bigWig files, maybe 200 GB of raw data) — ideally use a cluster for this
 
