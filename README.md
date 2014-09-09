@@ -68,7 +68,7 @@ git clone https://github.com/blmoore/3dgenome
 cd 3dgenome
 ```
 
-Now many scripts can be run as-is, i.e.:
+Now scripts can be run with Rscript, i.e.:
 
 ```bash
 > Rscript R/0_buildDatFiles.R 
@@ -166,7 +166,7 @@ This generates a single figure in a resource-intensive, uninteresting way (proba
 
 #### 9_additionalFigures.R
 
-Finally this script will plot the remaining supplementary figures: [`s3`](figures/s3_VarImpDifferences.pdf) and [`s5`](figures/s5_featureBoxplots.pdf).
+Finally this script will plot the remaining supplementary figures: [`s3`](figures/suppl/s3_VarImpDifferences.pdf) and [`s5`](figures/suppl/s5_featureBoxplots.pdf).
 
 ## sessionInfo()
 
