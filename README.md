@@ -127,7 +127,7 @@ Plots Random Forest modelling results per cell type as three separate plots ([`f
 
 #### 4_fig3CrossApplication.R
 
-Performs cross-application of cell type specific models and generates a summary plot ([`f3b_crossApplyBars.pdf`](figures/f3b_crossApplyBars.pdf)). Also plots a reciprocal example of cross application between two of the cell types (['f3ai`](figures/f3ai_gmXapplyK5.pdf) and [`f3aii`](figures/f3aii_k5XapplyGm.pdf)). Together these are **figure 3** in the manuscript.
+Performs cross-application of cell type specific models and generates a summary plot ([`f3b_crossApplyBars.pdf`](figures/f3b_crossApplyBars.pdf)). Also plots a reciprocal example of cross application between two of the cell types ([`f3ai`](figures/f3ai_gmXapplyK5.pdf) and [`f3aii`](figures/f3aii_k5XapplyGm.pdf)). Together these are **figure 3** in the manuscript.
 
 #### 5_fig4aStratifyByVariability.R
 
