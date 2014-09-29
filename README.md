@@ -1,7 +1,7 @@
 3dgenome
 ========
 
-Scripts to recreate figures in paper: _Integrative modelling reveals the principles of multi-scale chromatin boundary formation in human nuclear organisation_ (2014, in preparation).
+Scripts to recreate figures in paper: _Integrative modelling reveals the principles of multi-scale chromatin boundary formation in human nuclear organisation_ (2014, in preparation). For queries or help getting these running, you can contact me [on twitter](http://twitter.com/benjaminlmoore) or open an issue at the github repository.
 
 ### Table of contents
 
