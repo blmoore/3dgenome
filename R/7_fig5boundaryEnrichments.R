@@ -12,6 +12,7 @@ require("RColorBrewer")
 library("RHmm")
 library("scales")
 library("blmR")
+
 ## External files required: boundaries/
 ## Once boundaries are generated, build a bins file around each:
 ##   python binAroundBed.py h_cb.bed 1500000 > h_cb_bins.bed

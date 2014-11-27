@@ -38,14 +38,6 @@ getNum <- . %>%
 y <- t(sapply(bsq[,1], getNum))
 x <- t(sapply(bsq[,2], getNum))
 
-is.infinite(y)
-head(bsq)
-
-range(bsq$value)
-info <- function(n) 
-  ifelse(is.infinite(n), 100, n)
-
-bsq$log <- log10(bsq$value)
 bsq$size <- (y[,2] - y[,1]) * (x[,2] - x[,1])
 bsq$norm <- bsq$value / bsq$size
 
