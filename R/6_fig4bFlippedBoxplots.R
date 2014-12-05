@@ -326,6 +326,7 @@ pF$ct <- ifelse(pF$ct == "h", "H1 hESC",
 stopifnot(length(unique(pF$type)) == 2)
 
 pF$type <- ifelse(pF$type == "cts", "Cell type specific", "Shared")
+saveRDS(pF, "data/rds/chromFeaturesFlipped.rds")
 
 options(scipen=99)
 pd <- position_dodge(width=.9)

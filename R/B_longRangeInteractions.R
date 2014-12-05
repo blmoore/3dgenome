@@ -33,16 +33,18 @@ callCBounds <- function(sfile){
   return(outbed)
 }
 
-
 kcb <- callCBounds(k.1mb)
 gcb <- callCBounds(g.1mb)
 hcb <- callCBounds(h.1mb)
 
-
 # Read interaction matrix and convert to numeric
-gm.gw <- read.csv2("~/hvl/hicmap/gm_gw_1mb.mat", sep="\t", stringsAsFactors=F, header=T)
-h1.gw <- read.csv2("~/hvl/hicmap/h1_gw_1mb.mat", sep="\t", stringsAsFactors=F, header=T)
-k5.gw <- read.csv2("~/hvl/hicmap/k5_gw_1mb.mat", sep="\t", stringsAsFactors=F, header=T)
+readMbMat <- function(ct=c("gm", "h1", "k5"))
+  read.csv2(paste0("~/hvl/hicmap/", ct, "_gw_1mb.mat"), 
+            sep="\t", stringsAsFactors=F, header=T)
+
+gm.gw <- readMbMat("gm")
+h1.gw <- readMbMat("h1")
+k5.gw <- readMbMat("k5")
 
 gm.gw <- apply(gm.gw[,-c(1,2)], 2, as.numeric)
 h1.gw <- apply(h1.gw[,-c(1,2)], 2, as.numeric)
@@ -199,6 +201,7 @@ csomes <- cumsum(rle(gsub("\\..*", "", colnames(gm.gw)))$lengths)
 
 abline(h=csomes, col="grey50", lwd=2)
 abline(v=csomes, col="grey50", lwd=2)
+
 
 axis(1, at=c(mean(c(1, csomes[1])), zoo::rollmean(csomes, 2)), 
      labels=1:22, tick=F, col="grey60")

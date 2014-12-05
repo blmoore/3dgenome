@@ -1,3 +1,16 @@
 .Rproj.user
 .Rhistory
 .RData
+
+data/bedfiles/chromhmm.*
+data/bedfiles/h_*
+data/bedfiles/g_*
+data/bedfiles/k_*
+data/bedfiles/h.*
+data/bedfiles/g.*
+data/bedfiles/k.*
+data/bedfiles/none.bed
+
+data/text/h.*
+data/text/g.*
+data/text/k.*
