@@ -127,7 +127,13 @@ active$variable <- factor(active$variable, levels=var$variable, ordered=T)
 pdf("figures/suppl/flipped_Longrange.pdf", 6, 8)
 ggplot(active, aes(x=t, col=ct, y=variable)) + 
   geom_point(size=I(0)) + #theme_bw() +
-  geom_vline(xintercept=.5, col=I("grey40"), linetype=2) +
+  #geom_vline(xintercept=.5, col=I("grey40"), linetype=2) +
+  # GM average
+  geom_vline(xintercept=.466, col=I("#0000ff98"), linetype=2) +
+  # H1 average
+  geom_vline(xintercept=.513, col=I("#FFA50098"), linetype=2) +
+  # K5 average
+  geom_vline(xintercept=.434, col=I("#ff000098"), linetype=2) +
   scale_x_continuous(limits=c(.3, .7)) +
   scale_colour_manual(values=c("#0000ff", "#FFA500", "#ff0000")) +
   facet_grid(flip~., scales="free", space="free") +
@@ -137,45 +143,31 @@ ggplot(active, aes(x=t, col=ct, y=variable)) +
   theme(legend.position=c(.85,.8))
 dev.off()
 
-## rowSums across all flipped regions
+## lines on the plot:
+# 1) Average B compartment
+# 2) Average A compartment
+# 3) 50%
 
-res <- data.frame(rbind(cbind("A", rowSums(gflip[gflip$state == 1,-ncol(gflip)][,1])),
-           cbind("B", rowSums(gflip[gflip$state == 2,-ncol(gflip)][,1]))))
+## none flipped::
+gstates <- callStates(g.dat$eigen)$state
+stopifnot(length(gstates) == nrow(gm.mb))
+hstates <- callStates(h.dat$eigen)$state
+kstates <- callStates(k.dat$eigen)$state
 
-res$X2 <- as.numeric(as.character(res$X2))
-res$chr <- factor(gsub("\\..*", "", rownames(res)), levels=paste0("chr", 1:22))
-res$pos <- as.numeric(gsub(".*\\.", "", rownames(res)))
+# all contacts with A
+plot(density(rowSums(gm.mb[,gstates == 2]) / rowSums(gm.mb)), 
+     xlim=c(0,1), ylim=c(0, 8))
+lines(density(rowSums(h1.mb[,hstates == 2]) / rowSums(h1.mb)))
+lines(density(rowSums(k5.mb[,kstates == 2]) / rowSums(k5.mb)))
 
+# .466
+mean(rowSums(gm.mb[,gstates == 2]) / rowSums(gm.mb))
+# .513
+mean(rowSums(h1.mb[,hstates == 2]) / rowSums(h1.mb))
+# .434
+mean(rowSums(k5.mb[,kstates == 2]) / rowSums(k5.mb))
 
-ggplot(res, aes(x=pos/1e6, y=X2, fill=X1, col=X1)) + 
-  geom_bar(stat="identity") +
-  facet_wrap(~chr, scales="free_x") +
-  theme_bw() + theme(legend.position=c(.9,.1)) 
-
-group_by(res, X1) %>% summarise(m=sum(X2) / n())
-
-## average A / B contacts for an A / B compartment genome-wide
-## compare flipped regions to there, do they change their long-
-## range contact profiles?
-# remember A compartments make lots more contacts
-
-a <- which(callStates(g.dat)$state == 1)
-b <- which(callStates(g.dat)$state == 2)
-g.a <- gm.mb[,a]
-par(mfrow=c(2,1))
-# A compartments interaction frequencies with other A compartments::
-plot(density(rowMeans(gm.mb[a,a])), col="darkgreen",
-     main="Contact profile of active compartment")
-# B compartments 
-lines(density(rowMeans(gm.mb[a,b])), col="darkred")
-
-g.b <- gm.mb[,-a]
-plot(density(rowSums(g.b[a,])), col="darkgreen", xlim=c(1000,5000),
-     main="Contact profile of inactive compartment")
-lines(density(rowSums(g.b[-a,])), col="darkred", xlim=c(1000,5000))
-# B contacts
-
-
-sum(gm.mb[a,a]) / length(a)**2
-sum(gm.mb[-a,-a]) / (nrow(gm.mb) - length(a))**2
-
+library("plotrix")
+1.96*std.error(rowSums(gm.mb[,gstates == 2]) / rowSums(gm.mb))
+1.96*std.error(rowSums(h1.mb[,hstates == 2]) / rowSums(h1.mb))
+1.96*std.error(rowSums(k5.mb[,kstates == 2]) / rowSums(k5.mb))
