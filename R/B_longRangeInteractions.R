@@ -1,4 +1,5 @@
 library("magrittr")
+library("R.matlab")
 library("RColorBrewer")
 library("reshape2")
 library("blmR")
@@ -37,20 +38,28 @@ kcb <- callCBounds(k.1mb)
 gcb <- callCBounds(g.1mb)
 hcb <- callCBounds(h.1mb)
 
-# Read interaction matrix and convert to numeric
-readMbMat <- function(ct=c("gm", "h1", "k5"))
-  read.csv2(paste0("~/hvl/hicmap/", ct, "_gw_1mb.mat"), 
-            sep="\t", stringsAsFactors=F, header=T)
+readMbMat <- function(ct=c("gm", "h1", "k5")){
+  library("R.matlab")
+  hmb <- readMat(paste0("~/hvl/hiclib/hm/", ct, "c_1mb/heatmap.mat"))$heatmap
+  ind <- readMat(paste0("~/hvl/hiclib/hm/", ct, "c_1mb/positionIndex.mat"))$positionIndex
+  chr <- readMat(paste0("~/hvl/hiclib/hm/", ct, "c_1mb/chromosomeIndex.mat"))$chromosomeIndex
+  
+  colnames(hmb) <- rownames(hmb) <- paste0("chr", chr+1, ".", ind)
+  
+  rm <- which(colSums(hmb) == 0, arr.ind=T) 
+  hmb <- hmb[-rm, -rm]
+  hmb
+}
 
 gm.gw <- readMbMat("gm")
 h1.gw <- readMbMat("h1")
 k5.gw <- readMbMat("k5")
 
-gm.gw <- apply(gm.gw[,-c(1,2)], 2, as.numeric)
-h1.gw <- apply(h1.gw[,-c(1,2)], 2, as.numeric)
-k5.gw <- apply(k5.gw[,-c(1,2)], 2, as.numeric)
-
 plotLRI <- function(imat, compartments){
+# debugging
+  #  imat = gm.gw
+#  compartments = gcb
+  
   # Remove non-autosomal::
   rm <- substr(colnames(imat), 1, 4) %in% paste0("chr", c("X", "Y", "M"))
   imat <- imat[!rm,!rm]
@@ -61,7 +70,9 @@ plotLRI <- function(imat, compartments){
   
   b <- melt(as.matrix(imat))
   # factor to numeric, bad idea
-  b$Var2 <- as.numeric(b$Var2)
+  b$Var1 <- as.numeric(factor(b$Var1))
+  b$Var2 <- as.numeric(factor(b$Var2))
+  head(b)
   
   bb <- with(b, tapply(value, list(
     y=cut(Var1, breaks=breaks, include.lowest=T),
@@ -109,9 +120,9 @@ plotLRI <- function(imat, compartments){
   abline(h=csomes, col="grey50", lwd=2)
   abline(v=csomes, col="grey50", lwd=2)
   axis(1, at=c(mean(c(1, csomes[1])), zoo::rollmean(csomes, 2)), 
-       labels=1:22, tick=F, col="grey60")
+       labels=1:23, tick=F, col="grey60")
   axis(2, at=c(mean(c(1, csomes[1])), zoo::rollmean(csomes, 2)), 
-       labels=1:22, tick=F, col="grey60")
+       labels=1:23, tick=F, col="grey60")
   axis(1, at=c(1, csomes), labels=NA, col="grey60", lwd=2)
   axis(2, at=c(1, csomes), labels=NA, col="grey60", lwd=2)
   dev.off()

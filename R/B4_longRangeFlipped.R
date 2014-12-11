@@ -59,6 +59,7 @@ flip <- as.data.frame(group_by(b, ct) %>% mutate(c=1:n()), 105)
 #paste0(flip[flip$ct == "g",1:2], collapse=".")
 g.ids <- gsub(" ", "", apply(flip[flip$ct == "h",1:2], 1, paste0, collapse="."))
 
+# original grab flipped (all contacts near or far)
 grabFlipped <- function(mat, ids, dat){
   flip <- mat[,colnames(mat) %in% ids]
   flip <- as.data.frame(flip[,match(ids, colnames(flip))])
@@ -87,18 +88,6 @@ g.flip <- flippedCt("g")
 h.flip <- flippedCt("h")
 k.flip <- flippedCt("k")
 
-## Visualise actual contacts::
-# pal <- colorRampPalette(c("white", "steelblue4"))(56)
-# par(mfrow=c(14,2), mar=rep(1, 4))
-# for(i in 1:ncol(g.flip)){
-# #for(i in 1:2){
-#   compare <- as.matrix(data.frame(g.flip[,i], 
-#                                   h.flip[,i], 
-#                                   k.flip[,i]))
-#   image(log10(compare + 1),
-#         frame=F, axes=F, col=pal)
-# }
-
 props <- . %>% group_by(ct, variable, states) %>% 
   summarise(tot=sum(value)) %>% mutate(t=tot/sum(tot))
 
@@ -124,7 +113,7 @@ var <- flipped %>% subset(ct == flip & states == 2) %>%
 active <- subset(flipped, states==2)
 active$variable <- factor(active$variable, levels=var$variable, ordered=T)
 
-pdf("figures/suppl/flipped_Longrange.pdf", 6, 8)
+svg("figures/suppl/flipped_Longrange.svg", 6, 8)
 ggplot(active, aes(x=t, col=ct, y=variable)) + 
   geom_point(size=I(0)) + #theme_bw() +
   #geom_vline(xintercept=.5, col=I("grey40"), linetype=2) +
@@ -167,7 +156,158 @@ mean(rowSums(h1.mb[,hstates == 2]) / rowSums(h1.mb))
 # .434
 mean(rowSums(k5.mb[,kstates == 2]) / rowSums(k5.mb))
 
-library("plotrix")
-1.96*std.error(rowSums(gm.mb[,gstates == 2]) / rowSums(gm.mb))
-1.96*std.error(rowSums(h1.mb[,hstates == 2]) / rowSums(h1.mb))
-1.96*std.error(rowSums(k5.mb[,kstates == 2]) / rowSums(k5.mb))
+#------------------------------------------#
+# split into long and short range contacts #
+#------------------------------------------#
+long_range_lab <- "Long range"
+near_cis_lab <- "Regional (<10 Mb)"
+cutoff <- 10e6
+
+# v2 of grabFlipped() splits contacts into near-cis or long range (>20 Mb)
+grabFlipped_longRange <- function(mat, ids, dat, means=T){
+  flip <- mat[,colnames(mat) %in% ids]
+  flip <- as.data.frame(flip[,match(ids, colnames(flip))])
+  flip_states <- callStates(dat$eigen)$state
+
+  chr <- gsub("\\..*", "", rownames(flip))
+  bins <- as.numeric(gsub(".*?\\.", "", rownames(flip)))
+
+  df <- data.frame(flipped=character(),
+                   contacts=numeric(),
+                   type=character(),
+                   states=character(),
+                   bins=character())
+  for(i in 1:ncol(flip)){
+    tchr <- gsub("\\..*", "", colnames(flip)[i])
+    bin_dist <- abs(bins - as.numeric(gsub(".*?\\.", "", colnames(flip)[i])))
+    # if distance > 20 Mb OR different chromosome, "long range", else "near cis"
+    type <- ifelse(tchr != chr | bin_dist > cutoff, long_range_lab, near_cis_lab)
+    #type[bin_dist == 0] <- NA # 0 at self-interaction doesn't change proportion
+    odf <- data.frame(flipped=colnames(flip)[i],
+                      contacts=flip[,i],
+                      type=type,
+                      states=flip_states,
+                      bins=rownames(flip))
+    df <- rbind(df, odf)
+  }
+  
+  if(means){
+    df %>% group_by(flipped, type, states) %>% summarise(m=mean(contacts))
+  } 
+  
+  df
+}
+
+
+flippedCt_longRange <- function(celltype=c("h", "g", "k"), ...){
+  ids <- gsub(" ", "", apply(flip[flip$ct == celltype,1:2], 1, paste0, collapse="."))
+  gf <- grabFlipped_longRange(gm.mb, ids, g.dat, ...)
+  hf <- grabFlipped_longRange(h1.mb, ids, h.dat, ...)
+  kf <- grabFlipped_longRange(k5.mb, ids, k.dat, ...)
+  
+  # combine all
+  gf$ct <- "Gm12878"
+  hf$ct <- "H1 hESC"
+  kf$ct <- "K562"
+  
+  all <- rbind(gf, hf, kf)
+  all
+}
+
+# convert counts to proportions
+props2 <- . %>% group_by(ct, flipped, type, states) %>% 
+  summarise(tot=sum(contacts)) %>% mutate(t=tot/sum(tot))
+
+gflr <- props2(flippedCt_longRange("g"))
+hflr <- props2(flippedCt_longRange("h"))
+kflr <- props2(flippedCt_longRange("k"))
+
+gflr$flip <- "Gm12878"
+hflr$flip <- "H1 hESC"
+kflr$flip <- "K562"
+
+flipped_2 <- rbind(gflr, hflr, kflr)
+
+# chrX.longnum -> chrX:10-11
+chr <- gsub("\\..*", "", as.character(flipped_2$flipped))
+start <- as.numeric(gsub(".*\\.", "", as.character(flipped_2$flipped)))/1e6
+end <- start+1
+flipped_2$flipped <- paste0(chr, ":", start, "-", end)
+
+# ordering for variable factor
+var <- flipped_2 %>% subset(ct == flip & states == 2 & type == near_cis_lab) %>% 
+  group_by(ct) %>% arrange(t)
+active_2 <- subset(flipped_2, states==2)
+active_2$flipped <- factor(active_2$flipped, levels=var$flipped, ordered=T)
+
+#pdf("figures/suppl/flipped_longNear_2.pdf", 8, 8)
+ggplot(active_2, aes(x=t, col=ct, y=flipped)) + 
+  geom_point(size=I(0)) + #theme_bw() +
+  #geom_vline(xintercept=.5, col=I("grey40"), linetype=2) +
+  # GM average
+  geom_vline(xintercept=.466, col=I("#0000ff98"), linetype=2) +
+  # H1 average
+  geom_vline(xintercept=.513, col=I("#FFA50098"), linetype=2) +
+  # K5 average
+  geom_vline(xintercept=.434, col=I("#ff000098"), linetype=2) +
+  scale_x_continuous(limits=c(0, 1)) +
+  scale_colour_manual(values=c("#0000ff", "#FFA500", "#ff0000")) +
+  facet_grid(flip~type, scales="free", space="free") +
+  xlab("Proportion of interactions with active compartments") +
+  ylab("Megabase regions of variable structure") +
+  labs(colour="Cell type") + geom_point(size=I(2.5)) +
+  theme(legend.position="none")
+#dev.off()
+
+huh <- active_2 %>% group_by(flipped) %>% 
+  filter(type = is.na(type)) 
+huh[huh$flipped == "chr11:5-6",]
+
+# dashed lines should really be for long/short range, could
+# be done with diagonals of interaction matrix:
+#
+# Near cis::
+# x x x . . .
+#   x x x . .
+#     x x x .
+#       x x x
+#
+# Long range::
+# . . . x x x
+#   . . . x x
+#     . . . x
+#       . . .
+
+# contact proportions::
+gf <- flippedCt_longRange("g", means=F)
+hf <- flippedCt_longRange("h", means=F)
+kf <- flippedCt_longRange("k", means=F)
+
+gflr$flip <- "Gm12878"
+hflr$flip <- "H1 hESC"
+kflr$flip <- "K562"
+
+
+gf %>% group_by(flipped, type) %>% summarise(m=sum(contacts), mean=mean(contacts))
+
+with(subset(gf, flipped == "chr6.0"), plot(contacts+1, log="y", pch=20, col=type))
+
+gf$chr <- factor(gsub("\\..*", "", gf$bins), levels=paste0("chr", c(1:23)))
+gf$pos <- as.numeric(gsub(".*?\\.", "", gf$bins))
+
+levels(gf$flipped)[1]
+
+#pdf("figures/suppl/virt5c_flipped6_gm.pdf", 17, 4)
+ggplot(subset(gf, flipped==levels(flipped)[2]), #& type == "Near-cis (<5 Mb)"), 
+       aes(y=(log10(contacts+1) / log10(sum(contacts))), x=pos/1e6)) + 
+  geom_point(aes(col=type), alpha=I(1), size=I(2)) + 
+  #scale_y_log10() + 
+  scale_x_continuous(breaks=c()) +
+  facet_grid(ct~chr, scales="free_x", space="free") +
+  labs(y="Normalised interaction frequency") +  theme_bw() +
+  theme(legend.position="none") + xlab("")
+#dev.off()
+
+
+
+
