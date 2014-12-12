@@ -59,6 +59,7 @@ xdat <- melt(t(cmat))
 colnames(xdat) <- c("Applied to", "Trained on", "Corr")
 
 xdat <- xdat[c(1:3, 5,4,6, 9,7,8),]
+saveRDS(xdat, "data/rds/rf_xdat.rds")
 
 pdf(6, 6, file="figures/f3b_crossApplyBars.pdf")
 par(mgp=c(1.5,.2,0))

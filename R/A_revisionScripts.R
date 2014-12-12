@@ -116,6 +116,7 @@ axis(2, at=1:3, labels=colnames(lm.hm)[-1], line=NA, tick=F)
 
 
 ## RandomForest (xdat from 4_fig3CrossApplication.R)
+xdat <- readRDS("data/rds/rf_xdat.rds")
 #xdat
 rf.hm <- dcast( `Trained on` ~ `Applied to` , data=xdat)
 image(x=1:3, y=1:3, z=as.matrix(rf.hm[,-1]), col=p, zlim=c(-1,1), 
