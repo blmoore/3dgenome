@@ -6,12 +6,12 @@ library("blmR")
 
 readMbMat <- function(ct=c("gm", "h1", "k5")){
   library("R.matlab")
+  # 1Mb normalised contact matrices as output by hiclib / ICE
   hmb <- readMat(paste0("~/hvl/hiclib/hm/", ct, "c_1mb/heatmap.mat"))$heatmap
   ind <- readMat(paste0("~/hvl/hiclib/hm/", ct, "c_1mb/positionIndex.mat"))$positionIndex
   chr <- readMat(paste0("~/hvl/hiclib/hm/", ct, "c_1mb/chromosomeIndex.mat"))$chromosomeIndex
   
   colnames(hmb) <- rownames(hmb) <- paste0("chr", chr+1, ".", ind)
-  
   rm <- which(colSums(hmb) == 0, arr.ind=T) 
   hmb <- hmb[-rm, -rm]
   hmb
@@ -56,7 +56,6 @@ b$ct <- substr(b$V4, 1, 1)
 flip <- as.data.frame(group_by(b, ct) %>% mutate(c=1:n()), 105)
 # flipped open regions ordered per cell type by number of enhancers
 
-#paste0(flip[flip$ct == "g",1:2], collapse=".")
 g.ids <- gsub(" ", "", apply(flip[flip$ct == "h",1:2], 1, paste0, collapse="."))
 
 # original grab flipped (all contacts near or far)
@@ -113,6 +112,7 @@ var <- flipped %>% subset(ct == flip & states == 2) %>%
 active <- subset(flipped, states==2)
 active$variable <- factor(active$variable, levels=var$variable, ordered=T)
 
+# Supplementary figure 10 (S10)
 svg("figures/suppl/flipped_Longrange.svg", 6, 8)
 ggplot(active, aes(x=t, col=ct, y=variable)) + 
   geom_point(size=I(0)) + #theme_bw() +
@@ -132,10 +132,6 @@ ggplot(active, aes(x=t, col=ct, y=variable)) +
   theme(legend.position=c(.85,.8))
 dev.off()
 
-## lines on the plot:
-# 1) Average B compartment
-# 2) Average A compartment
-# 3) 50%
 
 ## none flipped::
 gstates <- callStates(g.dat$eigen)$state
@@ -163,7 +159,7 @@ long_range_lab <- "Long range"
 near_cis_lab <- "Regional (<10 Mb)"
 cutoff <- 10e6
 
-# v2 of grabFlipped() splits contacts into near-cis or long range (>20 Mb)
+# v2 of grabFlipped() splits contacts into near-cis or long range (>10 Mb)
 grabFlipped_longRange <- function(mat, ids, dat, means=T){
   flip <- mat[,colnames(mat) %in% ids]
   flip <- as.data.frame(flip[,match(ids, colnames(flip))])
@@ -287,27 +283,45 @@ gflr$flip <- "Gm12878"
 hflr$flip <- "H1 hESC"
 kflr$flip <- "K562"
 
+v5c <- function(ff){
+  # Raw numbers of near / far contacts:
+  ff = kf
+  ff %>% group_by(flipped, type) %>% summarise(m=sum(contacts), mean=mean(contacts))  
+  
+  ff$chr <- factor(gsub("\\..*", "", ff$bins), levels=paste0("chr", c(1:23)))
+  ff$pos <- as.numeric(gsub(".*?\\.", "", ff$bins))
+  
+  for( j in 1:length(levels(ff$flipped)) ){
+    #j = 7
+    plot <- levels(ff$flipped)[j]
+    hline_data <- data.frame(chr=gsub("\\..*", "", plot), 
+                             x=as.numeric(gsub(".*?\\.", "", plot)))
+    message(paste(j, plot))
+    #pdf("figures/suppl/virt5c_flipped6_gm.pdf", 17, 4)
+    print(ggplot(subset(ff, flipped==plot & contacts !=0), #& type == "Near-cis (<5 Mb)"), 
+                 aes(y=(log10(contacts+1) / log10(sum(contacts))), x=pos/1e6)) + 
+            geom_point(aes(col=states), alpha=I(1), size=I(2)) + 
+            #scale_y_log10() + 
+            scale_x_continuous(breaks=c()) +
+            facet_grid(ct~chr, scales="free", space="free") +
+            labs(y="Normalised interaction frequency") +  theme_bw() +
+            theme(legend.position="none") + xlab("") +
+            geom_vline(data=hline_data, aes(xintercept=x/1e6)))
+    #dev.off()
+    Sys.sleep(15)
+  }
+}
 
-gf %>% group_by(flipped, type) %>% summarise(m=sum(contacts), mean=mean(contacts))
+v5c(gf)
+# g 10
 
-with(subset(gf, flipped == "chr6.0"), plot(contacts+1, log="y", pch=20, col=type))
-
-gf$chr <- factor(gsub("\\..*", "", gf$bins), levels=paste0("chr", c(1:23)))
-gf$pos <- as.numeric(gsub(".*?\\.", "", gf$bins))
-
-levels(gf$flipped)[1]
-
-#pdf("figures/suppl/virt5c_flipped6_gm.pdf", 17, 4)
-ggplot(subset(gf, flipped==levels(flipped)[2]), #& type == "Near-cis (<5 Mb)"), 
-       aes(y=(log10(contacts+1) / log10(sum(contacts))), x=pos/1e6)) + 
-  geom_point(aes(col=type), alpha=I(1), size=I(2)) + 
-  #scale_y_log10() + 
-  scale_x_continuous(breaks=c()) +
-  facet_grid(ct~chr, scales="free_x", space="free") +
-  labs(y="Normalised interaction frequency") +  theme_bw() +
-  theme(legend.position="none") + xlab("")
-#dev.off()
+levels(kf$flipped)[9]
+h.dat[rownames(h.dat) == sub("\\.", "-", levels(kf$flipped)[7]),]
+g.dat[rownames(g.dat) == sub("\\.", "-", levels(kf$flipped)[7]),]
+k.dat[rownames(k.dat) == sub("\\.", "-", levels(kf$flipped)[7]),]
 
 
+head(kf)
+kf[kf$flipped == levels(kf$flipped)[9] & kf$bins == levels(kf$flipped)[9],]
 
-
+kf[kf$contacts == 0 & kf$flipped == levels(kf$flipped)[9] & kf$chr == "chr6",]

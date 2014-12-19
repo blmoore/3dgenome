@@ -177,7 +177,7 @@ plotPredRes.100kb <- function (modelOut = NA, x = NA, y = NA, col = "blue", ct =
   xy <- cbind(d1, d2)
   colour <- "#0000ff42"
   if (col != "blue") {
-    ifelse(col == "red", colour <- "#ff000042", colour <- "#FFA50062")
+    colour <- ifelse(col == "red", "#ff000042", "#FFA50062")
   }
   def.par <- par(no.readonly = TRUE)
   xhist <- hist(d1, plot = FALSE)
@@ -266,9 +266,29 @@ g.mod <- readRDS("~/hvl/ice/rds/Gm12878_35Vars_RFmod.rds")
 gkp <- predict(g.mod, g.kbdat)
 gkkp <- predict(g.mod, k.kbdat)
 
+h.mod <- readRDS("data/rds/H1hesc_35Vars_RFmod.rds")
+hkp <- predict(h.mod, h.kbdat)
+
+k.mod <- readRDS("data/rds/K562_35Vars_RFmod.rds")
+kkp <- predict(k.mod, k.kbdat)
+
+pdf("figures/suppl/g100_res.pdf", 6, 6)
 plotPredRes.100kb(x=gkp, y=g.kbdat$eigen, scale.factor=1.2, 
+                  ct="GM12878", col="blue")
+dev.off()
+
+pdf("figures/suppl/h100_res.pdf", 6, 6)
+plotPredRes.100kb(x=hkp, y=h.kbdat$eigen, scale.factor=1.2, 
                   ct="H1 hESC", col="orange")
-plotPredRes.100kb(x=gkkp, y=k.kbdat$eigen, ct="GM12878 -> K562",
-                  col="red", scale.factor=1.2)
+dev.off()
+
+pdf("figures/suppl/k100_res.pdf", 6, 6)
+plotPredRes.100kb(x=kkp, y=k.kbdat$eigen, scale.factor=1.2, 
+                  ct="K562", col="red")
+dev.off()
+
+# cross-app works too::
+#plotPredRes.100kb(x=gkkp, y=k.kbdat$eigen, ct="GM12878 -> K562",
+#                  col="red", scale.factor=1.2)
 
 dev.off()
