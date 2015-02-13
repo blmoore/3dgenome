@@ -3,6 +3,13 @@ library("ggplot2")
 library("gridExtra")
 library("reshape2")
 library("blmR")
+options(scipen=99)
+
+## Generates supplementary long range contacts figure part A and B
+## and (as yet unused) "compartments-eye view" of the genome plot.
+g.dat <- readRDS("data/rds/Gm12878_35Vars.rds")
+h.dat <- readRDS("data/rds/H1hesc_35Vars.rds")
+k.dat <- readRDS("data/rds/K562_35Vars.rds")
 
 readMbMat <- function(ct=c("gm", "h1", "k5")){
   library("R.matlab")
@@ -27,17 +34,17 @@ pF <- readRDS("data/rds/chromFeaturesFlipped.rds")
 
 enhancers <- pF[pF$feature == "E",]
 enhancers <- enhancers[order(enhancers$olap, decreasing=T),]
-i <- as.character(head(enhancers[!grepl("none|closed", enhancers$id),], 60)$id)
+i <- as.character(enhancers[!grepl("none|closed", enhancers$id),]$id)
 
 bins <- data.frame()
-for( d in paste0(c("g", "h", "k"), rep(c(".open.bed", ".closed.bed"),3))){
-  n <- read.table(paste0("~/hvl/ice/bedfiles/", d))
+for( d in paste0(c("g", "h", "k"), rep(c(".open.bed", ".closed.bed"),3)) ){
+  message(paste0("data/bedfiles/", d))
+  n <- read.table(paste0("data/bedfiles/", d))
   bins <- rbind(bins, n) 
 }
 
 bins <- bins[bins$V4 %in% i,]
 bins <- bins[match(i,bins$V4),]
-
 
 ## get macthing eigs, filter those that aren't -, - vs. +
 bins[,c("h", "g", "k")] <- 0
@@ -53,13 +60,16 @@ b <- cbind(bins, ucsc=paste0(bins[,1], ":", bins[,2] - 1.2e6, "-", bins[,3] + 1.
 b <- b[b$s == 1,-ncol(b)]
 b$ct <- substr(b$V4, 1, 1)
 
-flip <- as.data.frame(group_by(b, ct) %>% mutate(c=1:n()), 105)
+#flip <- as.data.frame(group_by(b, ct) %>% mutate(c=1:n()), 105)
+flip <- as.data.frame(group_by(b, ct) %>% mutate(c=1:n()))
 # flipped open regions ordered per cell type by number of enhancers
 
 g.ids <- gsub(" ", "", apply(flip[flip$ct == "h",1:2], 1, paste0, collapse="."))
 
 # original grab flipped (all contacts near or far)
 grabFlipped <- function(mat, ids, dat){
+#  mat=gm.mb
+ # dat=g.dat
   flip <- mat[,colnames(mat) %in% ids]
   flip <- as.data.frame(flip[,match(ids, colnames(flip))])
   flip$states <- callStates(dat$eigen)$state
@@ -113,7 +123,7 @@ active <- subset(flipped, states==2)
 active$variable <- factor(active$variable, levels=var$variable, ordered=T)
 
 # Supplementary figure 10 (S10)
-svg("figures/suppl/flipped_Longrange.svg", 6, 8)
+#svg("figures/suppl/flipped_Longrange.svg", 6, 8)
 ggplot(active, aes(x=t, col=ct, y=variable)) + 
   geom_point(size=I(0)) + #theme_bw() +
   #geom_vline(xintercept=.5, col=I("grey40"), linetype=2) +
@@ -130,7 +140,7 @@ ggplot(active, aes(x=t, col=ct, y=variable)) +
   ylab("Megabase regions of variable structure") +
   labs(colour="Cell type") + geom_point(size=I(2.5)) + 
   theme(legend.position=c(.85,.8))
-dev.off()
+#dev.off()
 
 
 ## none flipped::
@@ -156,8 +166,8 @@ mean(rowSums(k5.mb[,kstates == 2]) / rowSums(k5.mb))
 # split into long and short range contacts #
 #------------------------------------------#
 long_range_lab <- "Long range"
-near_cis_lab <- "Regional (<10 Mb)"
-cutoff <- 10e6
+near_cis_lab <- "Regional (<2 Mb)"
+cutoff <- 2e6
 
 # v2 of grabFlipped() splits contacts into near-cis or long range (>10 Mb)
 grabFlipped_longRange <- function(mat, ids, dat, means=T){
@@ -228,36 +238,60 @@ flipped_2 <- rbind(gflr, hflr, kflr)
 chr <- gsub("\\..*", "", as.character(flipped_2$flipped))
 start <- as.numeric(gsub(".*\\.", "", as.character(flipped_2$flipped)))/1e6
 end <- start+1
-flipped_2$flipped <- paste0(chr, ":", start, "-", end)
-
+#flipped_2$flipped <- paste0(chr, ":", start, "-", end)
+flipped_2$flipped <- paste0(gsub("chr", "", chr), ":", start)
+  
 # ordering for variable factor
-var <- flipped_2 %>% subset(ct == flip & states == 2 & type == near_cis_lab) %>% 
+var <- flipped_2 %>% subset(ct == flip & states == 2 & type == "Long range") %>% 
   group_by(ct) %>% arrange(t)
-active_2 <- subset(flipped_2, states==2)
+active_2 <- subset(flipped_2, states==2 & type == "Long range")
 active_2$flipped <- factor(active_2$flipped, levels=var$flipped, ordered=T)
 
-#pdf("figures/suppl/flipped_longNear_2.pdf", 8, 8)
-ggplot(active_2, aes(x=t, col=ct, y=flipped)) + 
-  geom_point(size=I(0)) + #theme_bw() +
-  #geom_vline(xintercept=.5, col=I("grey40"), linetype=2) +
-  # GM average
-  geom_vline(xintercept=.466, col=I("#0000ff98"), linetype=2) +
-  # H1 average
-  geom_vline(xintercept=.513, col=I("#FFA50098"), linetype=2) +
-  # K5 average
-  geom_vline(xintercept=.434, col=I("#ff000098"), linetype=2) +
-  scale_x_continuous(limits=c(0, 1)) +
-  scale_colour_manual(values=c("#0000ff", "#FFA500", "#ff0000")) +
-  facet_grid(flip~type, scales="free", space="free") +
-  xlab("Proportion of interactions with active compartments") +
-  ylab("Megabase regions of variable structure") +
-  labs(colour="Cell type") + geom_point(size=I(2.5)) +
-  theme(legend.position="none")
-#dev.off()
+# means
+means <- active_2 %>% group_by(ct, type) %>% summarise(mean(t))
+active_2$mean_t <- with(active_2, ifelse(ct == "Gm12878", 0.4366260,
+                                         ifelse(ct == "H1 hESC", 0.5137763, 0.4183666)))
 
-huh <- active_2 %>% group_by(flipped) %>% 
-  filter(type = is.na(type)) 
-huh[huh$flipped == "chr11:5-6",]
+pdf("figures/suppl/flipped_long_excl2_side.pdf", 4, 9)
+ggplot(active_2, aes(x=t - mean_t, col=ct, y=flipped)) + 
+  geom_point(size=I(0)) + 
+  geom_vline(xintercept=0, col="grey70") +
+  scale_colour_manual(values=c("#0000ff", "#FFA500", "#ff0000")) +
+  facet_grid(flip~., scales="free", space="free") +
+  ylab("All individual megabase regions of variable structure") + xlab("") +
+  labs(colour="Cell type") + geom_point(size=I(1.2)) +
+  theme_bw() +
+  theme(legend.position="none", 
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank(),
+        panel.grid.major=element_blank()) +
+  scale_x_continuous(limits=c(-.22, .22), 
+                     breaks=seq(-.2, .2, by=.1),
+                     labels=c("-0.2", "-0.1", "0", "+0.1", "+0.2"))
+dev.off()
+
+pdf("figures/suppl/flipped_long_excl2_int.pdf", 3, 8)
+ggplot(active_2, aes(y=t - mean_t, col=ct, x=ct, fill=ct, group=ct)) + 
+  geom_vline(yintercept=0, col="black") +
+  scale_colour_manual(values=c("#0000ff", "#FFA500", "#ff0000")) +
+  scale_fill_manual(values=c("#0000ff98", "#FFA50098", "#ff000098")) +
+  facet_grid(flip~., scales="free", space="free") +
+  geom_hline(xintercept=0, col="grey80") +
+  ylab("Proportion of long-range interactions (>2 Mb) with A compartments, relative to expected") +
+  labs(colour="Cell type") + xlab("") +
+  geom_boxplot(notch=T, outlier.colour="grey70") +
+  theme_bw() + #coord_flip() +
+  theme(legend.position="none",
+        axis.ticks.x=element_line(size=.2),
+        axis.title.x=element_text(size=9)) +
+  stat_summary(fun.y=median, geom="point", col="white") +
+  scale_y_continuous(limits=c(-.22, .22), 
+                     breaks=seq(-.2, .2, by=.1),
+                     labels=c("-0.2", "-0.1", "0", "+0.1", "+0.2"))
+dev.off()
+
+
+
 
 # dashed lines should really be for long/short range, could
 # be done with diagonals of interaction matrix:

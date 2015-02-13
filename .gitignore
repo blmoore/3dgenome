@@ -14,3 +14,7 @@ data/bedfiles/none.bed
 data/text/h.*
 data/text/g.*
 data/text/k.*
+
+data/nonrepo/*
+
+data/rds/tad_boundary_features.rds

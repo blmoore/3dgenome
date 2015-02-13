@@ -122,10 +122,10 @@ buildBoundariesDat <- function(ct=c("H1hesc", "Gm12878", "K562"),
                                type=c("Compartments", "TADs")){
   ## Combine TADs and boundaries into big dataframe
   if(type == "Compartments"){
-    dir <- "boundaries/cluster/"
+    dir <- "data/nonrepo/cluster/"
     steps <- 30
   } else {
-    dir <- "boundaries/cluster_tad/"
+    dir <- "data/nonrepo/cluster_tad/"
     steps <- 25
   }
   
@@ -282,10 +282,10 @@ dev.off()
 buildBoundariesFull <- function(ct=c("H1hesc", "Gm12878", "K562"), 
                                type=c("Compartments", "TADs")){
   if(type == "Compartments"){
-    dir <- "~/hvl/ice/boundaries/cluster/"
+    dir <- "data/nonrepo/cluster/"
     steps <- 30
   } else {
-    dir <- "~/hvl/ice/boundaries/cluster_tad/"
+    dir <- "data/nonrepo/cluster_tad/"
     steps <- 25
   }
   
@@ -342,6 +342,7 @@ gt.full <- buildBoundariesFull("Gm12878", "TADs")
 kt.full <- buildBoundariesFull("K562", "TADs")
 
 full.t <- rbind(ht.full, gt.full, kt.full)
+saveRDS(full.t, "data/rds/tad_boundary_features.rds")
 
 comp.t <- group_by(full.t, ct, type, feat) %.% 
   summarise(bound.mean = mean(X12),
