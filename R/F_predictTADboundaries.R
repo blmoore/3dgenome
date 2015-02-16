@@ -4,7 +4,6 @@ library("reshape2")
 # from 7_fig5boundaryEnrichments.R
 all.t <- readRDS("data/rds/tad_boundary_features.rds")
 
-
 ctcf <- subset(all.t, feat == "Ctcf")
 plot(ctcf$X12, pch=20, cex=.1, col="darkred")
 points(ctcf$X1, pch=20, cex=.1, col="darkblue")

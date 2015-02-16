@@ -10,6 +10,7 @@ data/bedfiles/h.*
 data/bedfiles/g.*
 data/bedfiles/k.*
 data/bedfiles/none.bed
+data/peaks/*
 
 data/text/h.*
 data/text/g.*
