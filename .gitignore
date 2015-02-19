@@ -19,3 +19,21 @@ data/text/k.*
 data/nonrepo/*
 
 data/rds/tad_boundary_features.rds
+
+data/bedfiles/gm_both_tads.bed
+
+data/bedfiles/gm_ctcf_tads.bed
+
+data/bedfiles/h1_yy1_tads.bed
+
+data/bedfiles/k5_both_tads.bed
+
+data/bedfiles/gm_yy1_tads.bed
+
+data/bedfiles/h1_both_tads.bed
+
+data/bedfiles/h1_ctcf_tads.bed
+
+data/bedfiles/k5_ctcf_tads.bed
+
+data/bedfiles/k5_yy1_tads.bed

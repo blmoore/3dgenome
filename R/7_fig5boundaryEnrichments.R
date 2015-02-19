@@ -13,6 +13,10 @@ library("RHmm")
 library("scales")
 library("blmR")
 
+g.dat <- readRDS("data/rds/Gm12878_35Vars.rds")
+h.dat <- readRDS("data/rds/H1hesc_35Vars.rds")
+k.dat <- readRDS("data/rds/K562_35Vars.rds")
+
 ## External files required: boundaries/
 ## Once boundaries are generated, build a bins file around each:
 ##   python binAroundBed.py h_cb.bed 1500000 > h_cb_bins.bed
