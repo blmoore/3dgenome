@@ -78,26 +78,26 @@ write_overlaps <- function(ct=1:3){
   message(paste0(signif(100*length(marked_tads) / length(tads), digits=3),
                  "% of tads have ctcf + yy1"))
   
-  message("Writing bed files...") 
-  export.bed(tads[which(tads %in% ctcf_tads),],
-             paste0("data/bedfiles/", short, "_ctcf_tads.bed"))
-  export.bed(tads[which(tads %in% marked_tads),], 
-             paste0("data/bedfiles/", short, "_both_tads.bed"))
-  export.bed(tads[which(tads %in% yy1_tads),], 
-             paste0("data/bedfiles/", short, "_yy1_tads.bed"))
+  which <- ifelse(tads %in% marked_tads, "both", 
+                  ifelse(tads %in% yy1_tads, "yy1", 
+                         ifelse(tads %in% ctcf_tads, "ctcf", "none")))
   
-  as.factor(ifelse(tads %in% marked_tads, "both", 
-                   ifelse(tads %in% yy1_tads, "yy1", 
-                          ifelse(tads %in% ctcf_tads, "ctcf", "none"))))
+  message("Writing bed files...") 
+  export.bed(tads[which == "ctcf",], paste0("data/bedfiles/", short, "_ctcf_tads.bed"))
+  export.bed(tads[which == "both",], paste0("data/bedfiles/", short, "_both_tads.bed"))
+  export.bed(tads[which == "yy1",], paste0("data/bedfiles/", short, "_yy1_tads.bed"))
+  export.bed(tads[which == "none",], paste0("data/bedfiles/", short, "_none_tads.bed"))
+  
+  message(length(tads))
+
+  return(as.factor(which))
 }
   
 # gm12878
 gt_status <- write_overlaps(1)
-pie(table(gt_status))
 
 # h1
 ht_status <- write_overlaps(2)
-
 
 # k5
 kt_status <- write_overlaps(3)
@@ -108,25 +108,26 @@ pie(table(ht_status))
 pie(table(kt_status))
 
 
+## now: e.g., running from py/: 
+#     python binAroundBed.py ../data/bedfiles/h1_both_tads.bed 500000 > ../data/nonrepo/inbed/hbb.bins
+
 
 ### --- Adapted from 7_fig5boundaryEnrichments.R --- ###
 
-buildBoundariesFull <- function(ct=c("H1hesc", "Gm12878", "K562"), 
-                                type=c("Compartments", "TADs")){
-  if(type == "Compartments"){
-    dir <- "data/nonrepo/cluster/"
-    steps <- 30
-  } else {
-    dir <- "data/nonrepo/cluster_tad/"
-    steps <- 25
-  }
+buildBoundariesFull <- function(ct=c("h", "g", "k"), 
+                                type=c("b", "c", "y", "n")){
+
+  dir <- "data/nonrepo/split/"
+  steps=25
   
-  fl <- paste0(dir, list.files(dir, pattern=paste0(".*", ct,".*")))
+  # filenames:: ct (h|g|k) + boundary type ([b]oth|[c]tcf|[y]y1|[n]one) + bins (b)
+  # e.g. hyb.bins_HaibTfbs...
+  fl <- paste0(dir, list.files(dir, pattern=paste0(ct, type, "b.bins_", ".*")))
   looper <- fl  
   # initiate all.dat df
   a <- read.delim(fl[1], header=F)
   all.dat <- data.frame(row.names=a$V1)
-  vars <- c(colnames(h.dat)[-1], "gerp")
+  vars <- colnames(h.dat)[-1]
   
   matches <- lapply(vars, function(x) grep(x, fl)[1])
   m <- fl[unlist(matches)]
@@ -156,15 +157,24 @@ buildBoundariesFull <- function(ct=c("H1hesc", "Gm12878", "K562"),
   return(gdf)
 }
 
-# TADs:
-ht.full <- buildBoundariesFull("H1hesc", "TADs")
-gt.full <- buildBoundariesFull("Gm12878", "TADs")
-kt.full <- buildBoundariesFull("K562", "TADs")
+types <- c("b", "n", "y", "c")
+h.all <- sapply(types, buildBoundariesFull, ct="h", simplify=F)
+h.all <- do.call(rbind, h.all)
 
-full.t <- rbind(ht.full, gt.full, kt.full)
-saveRDS(full.t, "data/rds/tad_boundary_features.rds")
+# g.all <- sapply(types, buildBoundariesFull, ct="g", simplify=F)
+# g.all <- do.call(rbind, g.all)
 
-comp <- group_by(full.t, ct, type, feat) %.% 
+k.all <- sapply(types, buildBoundariesFull, ct="k", simplify=F)
+k.all <- do.call(rbind, k.all)
+
+all.t <- rbind(h.all, k.all)
+
+saveRDS(all.t, "data/rds/tad_split_boundaries.rds")
+
+library("dplyr")
+library("ggplot2")
+
+comp <- group_by(all.t, ct, type, feat) %.% 
   summarise(bound.mean = mean(X12),
             edge.mean  = mean(c(X1, X2, X3, X4, X5, X25, X24, X23, X22, X21)),
             p = wilcox.test(X12, c(X1, X2, X3, X4, X5, X25, X24, X23, X22, X21))$p.value)
@@ -183,7 +193,7 @@ comp$feat <- as.character(caps2)
 #pdf("figures/f5b_boundaryEnrichmentBubble.pdf", 9, 5)
 ggplot(comp, aes(x=feat, y=-log10(p), col=type,
                  size=abs(bound.mean - edge.mean))) +
-  facet_grid(ct~., scales="free_y") + 
+  facet_grid(ct~.)+#, scales="free_y") + 
   geom_point(position=position_dodge(.15)) + theme_bw() +
   labs(list(size="Absolute difference\nat boundary",
             y=expression(-log[10](italic(p))),

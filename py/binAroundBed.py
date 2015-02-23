@@ -20,9 +20,11 @@ except:
 # i.e. h1_superBounds.bed | h1_tbounds.bed | h1_compart_bounds.bed
 
 if dist == 1500000:
+    # compartment bounds
     res   = 100000
     steps = 30
 elif dist == 500000:
+    # TAD bounds
     res   = 40000
     steps = 25
 else:
@@ -30,7 +32,7 @@ else:
     
 
 csize = {}
-with open(os.path.expanduser("../../hg19.chrom.sizes.txt"), "r") as cs:
+with open(os.path.expanduser("../data/text/hg19.chrom.sizes.txt"), "r") as cs:
     for l in cs:
         c = l.split()
         csize[c[0]] = int(c[1])

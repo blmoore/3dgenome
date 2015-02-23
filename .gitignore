@@ -37,3 +37,5 @@ data/bedfiles/h1_ctcf_tads.bed
 data/bedfiles/k5_ctcf_tads.bed
 
 data/bedfiles/k5_yy1_tads.bed
+
+data/rds/tad_split_boundaries.rds
