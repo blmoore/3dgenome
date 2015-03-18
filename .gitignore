@@ -39,3 +39,13 @@ data/bedfiles/k5_ctcf_tads.bed
 data/bedfiles/k5_yy1_tads.bed
 
 data/rds/tad_split_boundaries.rds
+
+data/rds/all40kb_H1hesc_35Vars.rds
+
+data/rds/tadagg_Gm12878_34Vars.rds
+
+data/rds/tadagg_H1hesc_34Vars.rds
+
+data/rds/tadagg_K562_34Vars.rds
+
+figures/inkscape/tads_epigenom.svg-g218699-644.png
