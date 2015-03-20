@@ -66,8 +66,8 @@ buildTadDat <- function(ct=c("H1hesc", "Gm12878", "K562")){
   }
   
   # Double-check column names 
-  cat("\n\nCheck these names match !\n")
-  print(cbind(colnames(all.dat), vars))
+  #cat("\n\nCheck these names match !\n")
+  #print(cbind(colnames(all.dat), vars))
   colnames(all.dat) <- vars
   
   saveRDS(all.dat, outfilename)
@@ -191,16 +191,16 @@ tad_heatmap2 <- function(tad_dat, compartments, k=3, km=F){
 }
 
 
-pdf("figures/inkscape/h1_tad_hm_2.pdf", 5, 5)
-tad_heatmap2(htads, hc, k=3, km=T)
+pdf("figures/inkscape/h1_tad_hm_3.pdf", 5, 5)
+tad_heatmap2(htads, hc, k=2, km=T)
 dev.off()
 
-pdf("figures/inkscape/gm_tad_hm_2.pdf", 5, 5)
-tad_heatmap2(gtads, gc, k=3, km=T)
+pdf("figures/inkscape/gm_tad_hm_3.pdf", 5, 5)
+tad_heatmap2(gtads, gc, k=2, km=T)
 dev.off()
 
-pdf("figures/inkscape/k5_tad_hm_2.pdf", 5, 5)
-tad_heatmap2(ktads, kc, k=3, km=T)
+pdf("figures/inkscape/k5_tad_hm_3.pdf", 5, 5)
+tad_heatmap2(ktads, kc, k=2, km=T)
 dev.off()
 
 tad_tile <- function(tads, compartments, k=3){
@@ -262,7 +262,11 @@ dev.off()
 ## optimal number of clusters::
 library("NbClust")
 nb <- NbClust(ktads, min.nc=2, max.nc=10, method="kmeans")
-
-##
+# 8 proposed 2 (7 proposed 3)
+nh <- NbClust(htads, min.nc=2, max.nc=10, method="kmeans")
+# 10 proposed 2
+ng <- NbClust(gtads, min.nc=2, max.nc=10, method="kmeans")
+# 12 proposed 2
+ncol(nb$Best.nc)
 
 

@@ -225,8 +225,3 @@ rect(ybottom=y[,1], ytop=y[,2],
      xleft=x[,1], xright=x[,2], 
      col=rgb(colorRamp(c("white", "steelblue4"))(n1), max=255),
      border=NA)
-
-# analyze output images
-library("EBImage")
-# see http://www.bioconductor.org/packages/release/bioc/vignettes/EBImage/inst/doc/EBImage-introduction.pdf
-vignette("EBImage")
