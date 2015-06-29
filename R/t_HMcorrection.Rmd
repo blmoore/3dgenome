@@ -1,0 +1,62 @@
+---
+title: "ic_norm"
+author: "Ben Moore"
+date: "16 June 2015"
+output: html_document
+---
+
+```{r include=F, echo=F}
+library("RColorBrewer")
+library("readr")
+library("R.matlab")
+c <- colorRampPalette(brewer.pal(9, "RdBu"))(128)
+```
+
+Iterative correction as performed by Hi-Corrector (v1.2) seems to have little impact on the high quality, recent datasets --- does this hold for the older data such as Lieberman Aiden's K562?
+
+
+```{r}
+library("readr")
+k <- read_tsv("/Volumes/BFD/hic_heatmaps/k562/all/40k/chr15_chr15.ic.tsv", col_names=F)
+k_un <- read_tsv("/Volumes/BFD/hic_heatmaps/k562/all/40k/chr15_chr15.tsv", col_names=F)
+
+region <- 500:700
+```
+
+How does this compare to ICE corrections, previously used in the manuscript?
+
+```{r}
+library("R.matlab")
+ko <- readMat("~/hvl/hiclib/hm/k540kb/(14, 14).mat")$`(14, 14)`
+
+ko_un <- read_delim("~/rao/compare_k566_chr15_corrected.tsv", 
+  " ", col_names=F)
+
+par(mfrow=c(2,4), mar=rep(1,4))
+image(log10(as.matrix(k_un[region,region]) + 1), 
+  main="Un-normalised", asp=1, col=c, axes=F)
+image(log10(as.matrix(k[region,region]) + 1),
+  main="Normalised", asp=1, col=c, axes=F)
+image(log10(as.matrix(ko[region, region] + 1)),
+  main="Old: ICE", asp=1, col=c, axes=F)
+image(log10(as.matrix(ko_un[region, region] + 1)),
+  main="Old: un-normalised", asp=1, col=c, axes=F)
+
+par(mar=rep(3,4))
+hist(rowSums(k_un)[rowSums(k_un) != 0])
+hist(rowSums(k)[rowSums(k) != 0])
+hist(rowSums(ko)[rowSums(ko) != 0])
+hist(rowSums(ko_un)[rowSums(ko_un) != 0])
+```
+
+How well does the new normalisation method correlate with the previous algo?
+
+```{r}
+# 
+# ucor <- sapply(1:nrow(k), function(f) cor(k[f,], k_un[f,]))
+# ccor <- sapply(1:nrow(k), function(g) cor(k[g,], ko[g,]))
+# 
+# hist(ucor)
+# hist(ccor, col=rgb(.1,.1,.1,.2), add=T)
+
+```
