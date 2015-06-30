@@ -143,14 +143,14 @@ compdf <- cbind(compdf, bound="Compartments")
 bothdf <- rbind(taddf, compdf)
 options(scipen=999)
 cat("Drawing: figures/suppl/s2a_boundsEcdf.pdf\n")
-pdf("figures/suppl/s2a_boundsEcdf.pdf", 6, 3.5)
+#pdf("figures/suppl/s2a_boundsEcdf.pdf", 6, 3.5)
 ggplot(bothdf, aes(x=value+1, col=variable)) +
   stat_ecdf(geom="line", size=1.1) + scale_x_log10() +
   facet_grid(.~bound, scales="free_x") + theme_bw() +
   theme(legend.position=c(.15,.8), legend.background=element_blank()) +
   labs(col="", y="ECDF", x="Distance to nearest H1 boundary (bp)") +
   scale_color_brewer(type="qual", palette=3)
-dev.off()
+#dev.off()
 
 # 4) Misc., statistical tests etc.
 median(tdf$K562)    # median: 300kb apart
