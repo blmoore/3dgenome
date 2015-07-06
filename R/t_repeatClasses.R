@@ -32,14 +32,14 @@ split_bed <- function(colvar = c("repFamily", "repClass")){
     invisible(write_bed(bed, fname = outname))
   }
   
-  classes <- get_classes(hrep[[colvar]])
+  classes <- get_classes(hrep, colvar)
     
   sapply(classes, per_var, df=hrep, genome="hg19")
   message("hg19 done")
   
   unique(mrep$repClass)[(which(!unique(mrep$repClass) %in% classes))]
   
-  mclass <- get_classes(mrep[[colvar]])
+  mclass <- get_classes(mrep, colvar)
     
   # repeat classes are the same in humand and mouse data (families not?)
   # stopifnot(all(classes %in% mclass) & all(mclass %in% classes))
@@ -60,27 +60,36 @@ buildBoundariesDat <- function(ct=c("h1", "k5", "gm"), type=c("c", "t"),
   ct <- match.arg(ct)
   type <- match.arg(type)
   col <- match.arg(col)
-
+  
+  ct = "h1"
+  type = "c"
+  col="repFamily"
+  
+  clab <- if(ct == "h1") "H1 hESC" else if(ct == "gm") "Gm12878" else "K562"
+  
   if(type == "c"){
     # compartments
     pattern <- paste0("^", ct, "cb_.*?", col, ".*\\.bed\\.out")
-    #steps <- 30
-    steps <- 19
+    type <- "Compartments"
+    steps <<- 39 # 1 Mb, 40 steps
+    #steps <- 19
   } else {
     # TADs
     pattern <- paste0("^", ct, "tb_.*?", col, ".*\\.bed\\.out")
-    steps <- 19
+    type <- "TADs"
+    steps <<- 39 # 1 Mb, 40 steps
+    # steps <- 19 # 500 kb, 20 steps
   }
   
   fl <- list.files("~/hvl/repeats/", pattern=pattern, full.names = T)
   looper <- fl  
   print(col)
   vars <- get_classes(hrep, col)
-  
-  matches <- lapply(vars, function(x) grep(x, fl)[1])
-  m <- fl[unlist(matches)]
-  m <- na.omit(m)
-  m <- unique(m)
+
+  # get vars and filelist into same ordering
+  vars <- sort(vars)
+  m <- fl[order(gsub("\\..*", "", fl))]
+  stopifnot(length(m) == length(vars))
   
   gdf <- data.frame(name=character(), 
     pos=numeric(),
@@ -89,9 +98,9 @@ buildBoundariesDat <- function(ct=c("h1", "k5", "gm"), type=c("c", "t"),
     mean.u=numeric())
   bins <- matrix(nrow=0, ncol=steps)
   if(summary){
-    for(f in seq_along(looper)){
-      message(looper[f])
-      feat <- read.table(looper[f])  
+    for(f in seq_along(m)){
+      message(m[f])
+      feat <- read.table(m[f])  
       ac <- matrix(feat$V5, ncol=steps, byrow=T)
       ac[is.nan(ac)] <- 0
       
@@ -102,13 +111,13 @@ buildBoundariesDat <- function(ct=c("h1", "k5", "gm"), type=c("c", "t"),
         mean=means, means.l=means-se, means.u=means+se)
       gdf <- rbind(gdf, outr)
     }
-    gdf$feat <-  rep(vars, each=steps)
-    gdf$ct <- ct
+    gdf$feat <- rep(vars, each=steps)
+    gdf$ct <- clab
     gdf$type <- type
     return(gdf)
   } else {
-    for(i in seq_along(looper)){
-      f <- looper[i]
+    for(i in seq_along(m)){
+      f <- m[i]
       message(f)
       var <- vars[i]
       feat <- read.table(f)  
@@ -118,17 +127,29 @@ buildBoundariesDat <- function(ct=c("h1", "k5", "gm"), type=c("c", "t"),
         feat=rep(var, nrow(ac)), ac)
       gdf <- rbind(gdf, outr)
     }
-    gdf$ct <- ct
+    gdf$ct <- clab
     gdf$type <- type
     return(gdf)
   }
 }
 
 blob <- function(each){
-  each %>% group_by(ct, type, feat) %>% 
-    summarise(bound.mean = mean(X10),
-      edge.mean  = mean(c(X1, X2, X3, X17, X18, X19)),
-      p = wilcox.test(X10, c(X1, X2, X3,  X17, X18, X19))$p.value)
+  if(steps == 19){
+    return(each %>% group_by(ct, type, feat) %>% 
+        summarise(bound.mean = mean(X10),
+          edge.mean  = mean(c(X1, X2, X3, X17, X18, X19)),
+          p = wilcox.test(X10, c(X1, X2, X3,  X17, X18, X19))$p.value))
+  } else {
+    if(steps == 39){
+      return(each %>% group_by(ct, type, feat) %>% 
+          summarise(bound.mean = mean(X20),
+            edge.mean  = mean(c(X1, X2, X3, X37, X38, X39)),
+            p = wilcox.test(X20, c(X1, X2, X3,  X37, X38, X39))$p.value))
+    }
+    else {
+      stop("Unknown number of steps")
+    }
+  }
 }
 
 fam_sum <- Map(buildBoundariesDat, c("h1", "gm", "k5"), rep(c("c", "t"), 3), col="repFamily", summary=T)
@@ -142,36 +163,38 @@ class_each <- Map(buildBoundariesDat, c("h1", "gm", "k5"), rep(c("c", "t"), 3), 
 class_each <- do.call(rbind, class_each)
 
 ## 1) profiles:
-pdf("plots/repFamily_v2.pdf", 6, 14)
+pdf("plots/repFamily_1Mb.pdf", 6, 28)
 ggplot(fam_sum, aes(x=pos, y=mean, col=type, fill=type)) + 
   facet_grid(feat~ct, scales="free") + 
-  geom_vline(xintercept=10, lwd=4, col=I(rgb(.8,.8,.8, .5))) +
+  geom_vline(xintercept=ceiling(steps/2), lwd=4, col=I(rgb(.8,.8,.8, .5))) +
   geom_ribbon(aes(ymin=means.l, ymax=means.u), alpha=I(.3), col=I(NULL)) +
   geom_line() + theme_bw() +
   scale_color_brewer(type = "qual", palette = 2) + 
   scale_fill_brewer(type = "qual", palette = 2) +
-  scale_x_continuous(breaks=c(0, 10, 19), labels = c("-450 kb", "boundary", "+450 kb")) +
+  scale_x_continuous(breaks=c(0, ceiling(steps/2), steps), 
+    labels = c("-450 kb", "boundary", "+450 kb")) +
   labs(x="", y="Mean annotated repeats per bin", col="", fill="")
 dev.off()
 
-pdf("plots/repClass_v2.pdf", 6, 14)
+pdf("plots/repClass_1Mb.pdf", 6, 14)
 ggplot(class_sum, aes(x=pos, y=mean, col=type, fill=type)) + 
   facet_grid(feat~ct, scales="free") + 
-  geom_vline(xintercept=10, lwd=4, col=I(rgb(.8,.8,.8, .5))) +
+  geom_vline(xintercept=ceiling(steps/2), lwd=4, col=I(rgb(.8,.8,.8, .5))) +
   geom_ribbon(aes(ymin=means.l, ymax=means.u), alpha=I(.3), col=I(NULL)) +
   geom_line() + theme_bw() +
   scale_color_brewer(type = "qual", palette = 2) + 
   scale_fill_brewer(type = "qual", palette = 2) +
-  scale_x_continuous(breaks=c(0, 10, 19), labels = c("-450 kb", "boundary", "+450 kb")) +
+  scale_x_continuous(breaks=c(0, ceiling(steps/2), steps), 
+    labels = c("-450 kb", "boundary", "+450 kb")) +
   labs(x="", y="Mean annotated repeats per bin", col="", fill="")
 dev.off()
 
 
 ## 2) bubble significance plots
-pdf("plots/repClass_bubble_v2.pdf", 9, 5)
+pdf("plots/repClass_bubble_1Mb.pdf", 9, 5)
 ggplot(blob(class_each), aes(x=feat, y=-log10(p), col=type,
   size=abs(bound.mean - edge.mean))) +
-  facet_grid(ct~., scales="free_y") + 
+  facet_grid(ct~.) + 
   geom_point(position=position_dodge(.15)) + theme_bw() +
   labs(list(size="Absolute difference\nat boundary",
     y=expression(-log[10](italic(p))),
@@ -184,10 +207,10 @@ ggplot(blob(class_each), aes(x=feat, y=-log10(p), col=type,
   ggtitle("Repeat classes over boundaries")
 dev.off()
 
-pdf("plots/repFamily_bubble_v2.pdf", 9, 5)
+pdf("plots/repFamily_bubble_1Mb.pdf", 9, 5)
 ggplot(blob(fam_each), aes(x=feat, y=-log10(p), col=type,
   size=abs(bound.mean - edge.mean))) +
-  facet_grid(ct~., scales="free_y") + 
+  facet_grid(ct~.) + 
   geom_point(position=position_dodge(.15)) + theme_bw() +
   labs(list(size="Absolute difference\nat boundary",
     y=expression(-log[10](italic(p))),
@@ -222,9 +245,19 @@ for( f in files ){
   head(f)
   library("reshape2")
   rep <- dcast(bin ~ rep, value.var = "bp", data=f, fill=0)
+  rep$bound <- rep(1:(nrow(rep)/19), each=19)
+  rep$num <- rep(1:19, nrow(rep)/19)
+  
+  # rm none, bound, bin, num ...  
+  reps <- colnames(rep)[-1][-((ncol(rep)-3):ncol(rep))]
+  
+  r <- new.env()
+  for( j in reps ){
+    df <- data.frame(rep$bin, rep[[j]])
   
   
-  
+  read_tsv("
+  group_by(bin, rpe
   
   
   
