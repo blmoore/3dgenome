@@ -49,8 +49,8 @@ split_bed <- function(colvar = c("repFamily", "repClass")){
 }
 
 
-split_bed("repFamily")
-split_bed("repClass")
+#split_bed("repFamily")
+#split_bed("repClass")
 
 ## -------------------- sh intersect.sh ----------------------------- ##
 
@@ -193,7 +193,7 @@ dev.off()
 
 
 ## 2) bubble significance plots
-pdf("plots/repClass_bubble_2Mb.pdf", 9, 5)
+pdf("plots/repClass_bubble_2Mb.pdf", 6, 5)
 ggplot(blob(class_each), aes(x=feat, y=-log10(p), col=type,
   size=abs(bound.mean - edge.mean))) +
   facet_grid(ct~.) + 
@@ -209,7 +209,7 @@ ggplot(blob(class_each), aes(x=feat, y=-log10(p), col=type,
   ggtitle("Repeat classes over boundaries")
 dev.off()
 
-pdf("plots/repFamily_bubble_2Mb.pdf", 9, 5)
+pdf("plots/repFamily_bubble_2Mb.pdf", 12, 5)
 ggplot(blob(fam_each), aes(x=feat, y=-log10(p), col=type,
   size=abs(bound.mean - edge.mean))) +
   facet_grid(ct~.) + 
@@ -227,39 +227,6 @@ dev.off()
 
 
 ## ---- bp per bin ---- ##
-files <- list.files("~/hvl/repeats/", pattern = ".*?\\.reptable", full.names = T)
 
-bins <- read_tsv("~/hvl/repeats/h1_tb.bed", col_names = F)
-head(bins)
-nrow(bins)
-# source of bins: 
-s <- read_tsv("~/hvl/production/3dgenome/data/bedfiles/h1_tadbounds.bed")
-nrow(s)
-
-
-
-for( f in files ){
-  # debugging
-  f = files[[104]]
-  
-  f <- read_tsv(f, col_names = c("bin", "rep", "bp"))
-  
-  head(f)
-  library("reshape2")
-  rep <- dcast(bin ~ rep, value.var = "bp", data=f, fill=0)
-  rep$bound <- rep(1:(nrow(rep)/19), each=19)
-  rep$num <- rep(1:19, nrow(rep)/19)
-  
-  # rm none, bound, bin, num ...  
-  reps <- colnames(rep)[-1][-((ncol(rep)-3):ncol(rep))]
-  
-  r <- new.env()
-  for( j in reps ){
-    df <- data.frame(rep$bin, rep[[j]])
-  
-  
-  read_tsv("
-  group_by(bin, rpe
-  
   
   
