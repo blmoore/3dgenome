@@ -53,6 +53,7 @@ split_bed <- function(colvar = c("repFamily", "repClass")){
 #split_bed("repClass")
 
 ## -------------------- sh intersect.sh ----------------------------- ##
+options(warn=2)
 
 buildBoundariesDat <- function(ct=c("h1", "k5", "gm"), type=c("c", "t"),
                               col=c("repFamily", "repClass"), summary=T, steps=nsteps){
@@ -106,7 +107,7 @@ buildBoundariesDat <- function(ct=c("h1", "k5", "gm"), type=c("c", "t"),
         mean=means, means.l=means-se, means.u=means+se)
       gdf <- rbind(gdf, outr)
     }
-    gdf$feat <- rep(vars, each=steps)
+    gdf$feat <- rep(gsub("_", " ", vars), each=steps)
     gdf$ct <- clab
     gdf$type <- type
     return(gdf)
@@ -119,7 +120,7 @@ buildBoundariesDat <- function(ct=c("h1", "k5", "gm"), type=c("c", "t"),
       ac <- matrix(feat$V5, ncol=steps, byrow=T)
       ac[is.nan(ac)] <- 0
       outr <- data.frame(name=f, bound=1:nrow(ac), 
-        feat=rep(var, nrow(ac)), ac)
+        feat=rep(gsub("_", " ", var), nrow(ac)), ac)
       gdf <- rbind(gdf, outr)
     }
     gdf$ct <- clab
@@ -129,43 +130,44 @@ buildBoundariesDat <- function(ct=c("h1", "k5", "gm"), type=c("c", "t"),
 }
 
 blob <- function(each){
-  if(nsteps == 19){
-    return(each %>% group_by(ct, type, feat) %>% 
-        summarise(bound.mean = mean(X10),
-          edge.mean  = mean(c(X1, X2, X3, X17, X18, X19)),
-          p = wilcox.test(X10, c(X1, X2, X3,  X17, X18, X19))$p.value))
-  } else {
-    if(nsteps == 39){
-      return(each %>% group_by(ct, type, feat) %>% 
-          summarise(bound.mean = mean(X20),
-            edge.mean  = mean(c(X1, X2, X3, X37, X38, X39)),
-            p = wilcox.test(X20, c(X1, X2, X3,  X37, X38, X39))$p.value))
-    }
-    else {
-      if (nsteps == 79){
-        return(each %>% group_by(ct, type, feat) %>% 
-            summarise(bound.mean = mean(X40),
-              edge.mean  = mean(c(X1, X2, X3, X67, X68, X69)),
-              p = wilcox.test(X40, c(X1, X2, X3,  X67, X68, X69))$p.value))
-      } else stop("Unknown number of steps")
-    }
-  }
+  #nsteps == ncol(each) - x (three? four?)
+  library("lazyeval")
+  edges <- paste0("X", c(1:3, nsteps-2, nsteps-1, nsteps))
+  mid <- paste0("X", round(nsteps/2))
+  
+  # use dplyr with standard evaluation via lazyeval
+  return(
+    each %>% group_by(ct, type, feat) %>%
+    summarise_(
+      bound.mean = interp(~mean(mid), mid=as.name(mid)),
+      edge.mean  = interp(~mean(edges), edges=as.name(edges)),
+      p          = interp(~wilcox.test(mid, edges)$p.value, mid=as.name(mid), edges=as.name(edges)))
+  )
 }
+  
+# nsteps: number of steps in binAroundBed.py -1 !
+nsteps <- 41
 
-nsteps <- 79
-
-fam_sum <- Map(buildBoundariesDat, c("h1", "gm", "k5"), rep(c("c", "t"), 3), col="repFamily", summary=T)
+fam_sum <- Map(buildBoundariesDat, 
+  c("h1", "gm", "k5"), rep(c("c", "t"), 3), 
+  col="repFamily", summary=T, steps=nsteps)
 fam_sum <- do.call(rbind, fam_sum)
-fam_each <- Map(buildBoundariesDat, c("h1", "gm", "k5"), rep(c("c", "t"), 3), col="repFamily", summary=F)
+fam_each <- Map(buildBoundariesDat, 
+  c("h1", "gm", "k5"), rep(c("c", "t"), 3), 
+  col="repFamily", summary=F, steps=nsteps)
 fam_each <- do.call(rbind, fam_each)
 
-class_sum <- Map(buildBoundariesDat, c("h1", "gm", "k5"), rep(c("c", "t"), 3), col="repClass", summary=T)
+class_sum <- Map(buildBoundariesDat, 
+  c("h1", "gm", "k5"), rep(c("c", "t"), 3), 
+  col="repClass", summary=T, steps=nsteps)
 class_sum <- do.call(rbind, class_sum)
-class_each <- Map(buildBoundariesDat, c("h1", "gm", "k5"), rep(c("c", "t"), 3), col="repClass", summary=F)
+class_each <- Map(buildBoundariesDat, 
+  c("h1", "gm", "k5"), rep(c("c", "t"), 3), 
+  col="repClass", summary=F, steps=nsteps)
 class_each <- do.call(rbind, class_each)
 
 ## 1) profiles:
-pdf("plots/repFamily_2Mb.pdf", 6, 28)
+pdf("plots/repFamily_1Mb.pdf", 6, 28)
 ggplot(fam_sum, aes(x=pos, y=mean, col=type, fill=type)) + 
   facet_grid(feat~ct, scales="free") + 
   geom_vline(xintercept=ceiling(nsteps/2), lwd=4, col=I(rgb(.8,.8,.8, .5))) +
@@ -174,11 +176,14 @@ ggplot(fam_sum, aes(x=pos, y=mean, col=type, fill=type)) +
   scale_color_brewer(type = "qual", palette = 2) + 
   scale_fill_brewer(type = "qual", palette = 2) +
   scale_x_continuous(breaks=c(0, ceiling(nsteps/2), nsteps), 
-    labels = c("-450 kb", "boundary", "+450 kb")) +
-  labs(x="", y="Mean annotated repeats per bin", col="", fill="")
+    labels = c("-1 Mb", "Boundary", "+1 Mb")) +
+  scale_y_continuous(breaks=scales::pretty_breaks(3)) +
+  theme(axis.text.x=element_text(angle=90, hjust=1, vjust=.5, size=I(8)),
+    panel.grid=element_blank(), strip.text.y=element_text(size=I(6))) +
+  labs(x="", y="Mean number of annotated repeats per 50 kb", col="", fill="")
 dev.off()
 
-pdf("plots/repClass_2Mb.pdf", 6, 14)
+pdf("plots/repClass_1Mb.pdf", 6, 14)
 ggplot(class_sum, aes(x=pos, y=mean, col=type, fill=type)) + 
   facet_grid(feat~ct, scales="free") + 
   geom_vline(xintercept=ceiling(nsteps/2), lwd=4, col=I(rgb(.8,.8,.8, .5))) +
@@ -187,13 +192,16 @@ ggplot(class_sum, aes(x=pos, y=mean, col=type, fill=type)) +
   scale_color_brewer(type = "qual", palette = 2) + 
   scale_fill_brewer(type = "qual", palette = 2) +
   scale_x_continuous(breaks=c(0, ceiling(nsteps/2), nsteps), 
-    labels = c("-450 kb", "boundary", "+450 kb")) +
-  labs(x="", y="Mean annotated repeats per bin", col="", fill="")
+    labels = c("-1 Mb", "Boundary", "+1 Mb")) +
+  scale_y_continuous(breaks=scales::pretty_breaks(3)) +
+  theme(axis.text.x=element_text(angle=90, hjust=1, vjust=.5, size=I(8)),
+    panel.grid=element_blank(), strip.text.y=element_text(size=I(7))) +
+  labs(x="", y="Mean number of annotated repeats per 50 kb", col="", fill="")
 dev.off()
 
-
+options(warn=1)
 ## 2) bubble significance plots
-pdf("plots/repClass_bubble_2Mb.pdf", 6, 5)
+pdf("plots/repClass_bubble_1Mb.pdf", 6, 5)
 ggplot(blob(class_each), aes(x=feat, y=-log10(p), col=type,
   size=abs(bound.mean - edge.mean))) +
   facet_grid(ct~.) + 
@@ -209,7 +217,7 @@ ggplot(blob(class_each), aes(x=feat, y=-log10(p), col=type,
   ggtitle("Repeat classes over boundaries")
 dev.off()
 
-pdf("plots/repFamily_bubble_2Mb.pdf", 12, 5)
+pdf("plots/repFamily_bubble_1Mb.pdf", 12, 5)
 ggplot(blob(fam_each), aes(x=feat, y=-log10(p), col=type,
   size=abs(bound.mean - edge.mean))) +
   facet_grid(ct~.) + 
@@ -227,6 +235,4 @@ dev.off()
 
 
 ## ---- bp per bin ---- ##
-
-  
   
