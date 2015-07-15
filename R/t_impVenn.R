@@ -23,6 +23,7 @@ v <- venn.diagram(x=list(K562=k10, GM12878=g10, H1=h10),
   fill=c("red","blue","orange"))
 
 #svg("~/hvl/thesis_plots/top10_venn.svg", 4, 4)
+dev.new()
 grid::grid.draw(v)
 dev.off()
 

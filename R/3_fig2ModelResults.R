@@ -22,17 +22,17 @@ k.mod <- readRDS("data/rds/K562_35Vars_RFmod.rds")
 ## these can't be combined on plot device with mfrow etc.
 ## due to the complicated layout() used to add side densities.
 cat("Drawing: f2_<ct>Res.pdf (3 plots)\n")
-pdf("figures/f2_gmRes.pdf", 6, 6)
+pdf("figures/f2_gmRes.pdf", 4.5, 4.5)
 plotPredRes(x=g.mod$predicted, y=g.dat$eigen,
                 col="blue", ct="GM12878", scale.factor=.8)
 dev.off()
 
-pdf("figures/f2_h1Res.pdf", 6, 6)
+pdf("figures/f2_h1Res.pdf", 4.5, 4.5)
 plotPredRes(x=h.mod$predicted, y=h.dat$eigen,
                 col="orange", ct="H1 hESC", scale.factor=.7)
 dev.off()
 
-pdf("figures/f2_k5Res.pdf", 6, 6)
+pdf("figures/f2_k5Res.pdf", 4.5, 4.5)
 plotPredRes(x=k.mod$predicted, y=k.dat$eigen,
                 col="red", ct="K562", scale.factor=.6)
 dev.off()
