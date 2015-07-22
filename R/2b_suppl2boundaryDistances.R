@@ -152,6 +152,18 @@ ggplot(bothdf, aes(x=value+1, col=variable)) +
   scale_color_brewer(type="qual", palette=3)
 #dev.off()
 
+# thesis version, TADs only ::
+# pdf("~/hvl/thesis_plots/taddist.pdf", 4, 4)
+# ggplot(taddf, aes(x=value+1, col=variable)) +
+#   stat_ecdf(geom="line", size=1.1) + 
+#   scale_x_log10(breaks=c(10, 1000, 100000, 1e7),
+#     labels=c("10 bp", "1 kb", "100 kb", "10 Mb")) +
+#     theme_minimal() +
+#   theme(legend.position=c(.23,.86), legend.background=element_blank()) +
+#   labs(col="", y="ECDF", x="Distance to nearest H1 boundary") +
+#   scale_color_brewer(type="qual", palette=3) 
+# dev.off()  
+
 # 4) Misc., statistical tests etc.
 median(tdf$K562)    # median: 300kb apart
 median(tdf$GM12878) # median: 180 kb
