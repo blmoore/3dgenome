@@ -50,9 +50,17 @@ g.pls <- plsreg1(g.dat[,-1], g.dat$eigen, crosval=T, comps=NULL)
 h.pls <- plsreg1(h.dat[,-1], h.dat$eigen, crosval=T, comps=NULL)
 k.pls <- plsreg1(k.dat[,-1], k.dat$eigen, crosval=T, comps=NULL)
 
-plot(k.pls)
-plot(h.pls)
-plot(g.pls)
+svg("~/hvl/thesis_plots/k_pls_cc.svg", 4, 4)
+plot(k.pls, main="K562")
+dev.off()
+
+svg("~/hvl/thesis_plots/h_pls_cc.svg", 4, 4)
+plot(h.pls, main = "H1 hESC")
+dev.off()
+
+svg("~/hvl/thesis_plots/g_pls_cc.svg", 4, 4)
+plot(g.pls, main = "GM12878")
+dev.off()
 
 g.pls$R2
 g.pls$Q2
