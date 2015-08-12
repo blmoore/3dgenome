@@ -143,14 +143,16 @@ compdf <- cbind(compdf, bound="Compartments")
 bothdf <- rbind(taddf, compdf)
 options(scipen=999)
 cat("Drawing: figures/suppl/s2a_boundsEcdf.pdf\n")
-#pdf("figures/suppl/s2a_boundsEcdf.pdf", 6, 3.5)
+pdf("~/hvl/thesis_plots/comptad_diff.pdf", 6, 3.5)
 ggplot(bothdf, aes(x=value+1, col=variable)) +
-  stat_ecdf(geom="line", size=1.1) + scale_x_log10() +
-  facet_grid(.~bound, scales="free_x") + theme_bw() +
+  stat_ecdf(geom="line", size=1.1) + 
+  scale_x_log10(breaks=c(10, 1000, 100000, 1e7),
+         labels=c("10 bp", "1 kb", "100 kb", "10 Mb")) +
+  facet_grid(.~bound, scales="free_x") + theme_minimal() +
   theme(legend.position=c(.15,.8), legend.background=element_blank()) +
-  labs(col="", y="ECDF", x="Distance to nearest H1 boundary (bp)") +
+  labs(col="", y="ECDF", x="Distance to nearest H1 boundary") +
   scale_color_brewer(type="qual", palette=3)
-#dev.off()
+dev.off()
 
 # thesis version, TADs only ::
 # pdf("~/hvl/thesis_plots/taddist.pdf", 4, 4)
@@ -163,6 +165,18 @@ ggplot(bothdf, aes(x=value+1, col=variable)) +
 #   labs(col="", y="ECDF", x="Distance to nearest H1 boundary") +
 #   scale_color_brewer(type="qual", palette=3) 
 # dev.off()  
+
+## thesis, Compartments only ::
+# pdf("~/hvl/thesis_plots/compdist.pdf", 4, 4)
+# ggplot(compdf, aes(x=value+1, col=variable)) +
+#   stat_ecdf(geom="line", size=1.1) + 
+#   scale_x_log10(breaks=c(10, 1000, 100000, 1e7),
+#     labels=c("10 bp", "1 kb", "100 kb", "10 Mb")) +
+#     theme_minimal() +
+#   theme(legend.position=c(.23,.86), legend.background=element_blank()) +
+#   labs(col="", y="ECDF", x="Distance to nearest H1 boundary") +
+#   scale_color_brewer(type="qual", palette=3) 
+# dev.off()
 
 # 4) Misc., statistical tests etc.
 median(tdf$K562)    # median: 300kb apart
@@ -179,7 +193,9 @@ comp.k <- 100 * nrow(cdf[cdf$K562 <= 100000,]) / nrow(cdf)    # 35.12 %
 comp.null <- 100 * nrow(cdf[cdf$Null <= 100000,]) / nrow(cdf) # 7.49  %
 
 ks.test(tdf$K562, tdf$Null)
-ks.test(cdf$K562, cdf$Null)
+
+ks.test(cdf$K562, cdf$Null)$p.value
+ks.test(cdf$GM12878, cdf$Null)
 
 ## Fig 2b: corrgram of eigenvector correlations:
 cat("Drawing: figures/suppl/s2b_compartmentCorrgram.pdf\n")

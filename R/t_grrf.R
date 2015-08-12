@@ -1,6 +1,7 @@
 library("DAAG")
 library("ggplot2")
 library("randomForest")
+library("reshape2")
 library("RRF")
 
 set.seed(42)
@@ -168,48 +169,153 @@ lasso <- function(full){
   rf <- randomForest(as.formula(paste0("eigen~", paste(terms, collapse="+"))),
     data=full)
   message("   rf : ", cor(rf$predicted, full$eigen))
+  model
 }
 
 # record 
-lasso(gfull)
-lasso(hfull)
-lasso(kfull)
+glasso <- lasso(gfull)
+hlasso <- lasso(hfull)
+klasso <- lasso(kfull)
 
-ggcv <- cv.glmnet(as.matrix(hfull[train,-1]), y=hfull[train,]$eigen, alpha=1)
-par(mfrow=c(2,1))
-plot(ggg, xvar="lambda", label=T)
-plot(ggcv)
-ggcv$lambda.1se
+pdf("~/hvl/thesis_plots/lasso_coef_bar.pdf", 6, 2.8)
+par(mar=c(4,5,1,1), mfrow=c(1,3))
+barplot(sort(glasso$beta[order(abs(glasso$beta), decreasing=T),][10:1]), las=1, horiz=T, border=F,
+  names.arg = c("Znf143", "c-Fos", "IRF3", "ATF3", "YY1", "ETS1", "RXRA", "MAX",
+    "MEF2A", "TR4"), main="GM12878", col="#0000ff92")
+barplot(sort(hlasso$beta[order(abs(hlasso$beta), decreasing=T),][10:1]), las=1, horiz=T, border=F,
+  names.arg = c("EGR1", "H3K27ac", "USF2", "JARID1A", "CHD1", "H3K36me3", "RAD21", "ATF2", "RBBP5", "RXRA"),
+  main="H1 hESC", col="#FFA50092")
+barplot(sort(klasso$beta[order(abs(klasso$beta), decreasing=T),][10:1]), las=1, horiz=T, border=F,
+  names.arg = c("P300", "BACH1", "ATF1", "MXI1", "ZNF143", "ILF2", "BRF2", "c-Jun", "H3K27me3", "BRG1"),
+  main="K562", col="#ff000092")
+dev.off()
 
-gg2 <- glmnet(as.matrix(hfull[train,-1]), y=hfull[train,]$eigen, alpha=1, 
-  family="gaussian", lambda=ggcv$lambda.1se)
 
-p <- predict(gg2, newx=as.matrix(hfull[test,-1]), s=ggcv$lambda.1se,
-  type="response")
-cor(p, hfull$eigen[test])
+## table of top X regressors in each case
 
-cs <- as.data.frame(t(as.matrix(ggg$beta)))
-cs$lambda <- ggg$lambda
-head(cs)
-cs <- melt(cs, id.vars =  "lambda")
+glasso
 
-#kept / unkept var
-chosen <- cs$lambda[which.min(abs(unique(cs$lambda) - ggcv$lambda.1se))]
-kept <- as.character(unique(cs$variable)[which(subset(cs, lambda == chosen)$value != 0)])
-cs$kept <- ifelse(cs$variable %in% kept, T, F)
+ggg <- glmnet(as.matrix(gfull[train,-1]), y=gfull[train,]$eigen, alpha=1, 
+  family="gaussian", nlambda=100)
+hhh <- glmnet(as.matrix(hfull[train,-1]), y=hfull[train,]$eigen, alpha=1, 
+  family="gaussian")
+kkk <- glmnet(as.matrix(kfull[train,-1]), y=kfull[train,]$eigen, alpha=1, 
+  family="gaussian")
 
-labdf <- subset(cs, lambda == min(cs$lambda) & kept == T)
-labdf$labs <- gsub("V04\\d*|Std0|Iggrab0|Ucd0", "",
-  gsub("HaibTfbs|SydhTfbs|OpenChromChip", "" , 
-     gsub("AlnRep?", "", gsub("BroadHistone", "", 
-          gsub("H1hesc|Gm12878|K562", "", labdf$variable)))))
+ggcv <- cv.glmnet(as.matrix(gfull[train,-1]), y=gfull[train,]$eigen, alpha=1, nlambda=100)
+hhcv <- cv.glmnet(as.matrix(hfull[train,-1]), y=hfull[train,]$eigen, alpha=1)
+kkcv <- cv.glmnet(as.matrix(kfull[train,-1]), y=kfull[train,]$eigen, alpha=1)
+
+trace_df <- function(glmnet, cvglmnet, ct){
+  # Coefficient trace data.frame for plotting
+  cs <- as.data.frame(t(as.matrix(glmnet$beta)))
+  # colnames == variables; rownames == lambda
+  cs$lambda <- glmnet$lambda
+  cs <- melt(cs, id.vars =  "lambda")
+  
+  #kept / unkept var
+  chosen <- cs$lambda[which.min(abs(unique(cs$lambda) - cvglmnet$lambda.1se))]
+  kept <- as.character(unique(cs$variable)[which(subset(cs, lambda == chosen)$value != 0)])
+  cs$kept <- ifelse(cs$variable %in% kept, T, F)
+  cs$ct <- ct
+  cs$chosen_lambda <- chosen
+  cs
+}
+
+gdf <- trace_df(ggg, ggcv, "GM12878")
+hdf <- trace_df(hhh, hhcv, "H1 hESC")
+kdf <- trace_df(kkk, kkcv, "K562")
+
+adf <- rbind(gdf, kdf, hdf)
+
+get_labels <- function(df){
+  labdf <- subset(df, lambda == min(df$lambda) & kept == T)
+  labdf$labs <- gsub("V04\\d*|Std0|Iggrab0|Ucd0", "",
+    gsub("HaibTfbs|SydhTfbs|OpenChromChip", "" , 
+      gsub("AlnRep?", "", gsub("BroadHistone", "", 
+        gsub("H1hesc|Gm12878|K562", "", labdf$variable)))))
+  
+  labdf$ct <- unique(df$ct)
+  labdf
+}
+
+
+glab <- get_labels(gdf)
+hlab <- get_labels(hdf)
+klab <- get_labels(kdf)
+labs <- rbind(glab, hlab, klab)
+
+## clean up adf$variable (370 levels)
+# label format: CentreTypeCellFEATProcedure, we want FEAT
+# unique(adf$variable)
+
+clean_names <- function(name_vec){
+  # 1) rm cell types and all preceeding (305 levels)
+  name_vec<- gsub(".*?(Gm12878|K562|H1hesc)", "", name_vec)
+  
+  # 2) rm procedure suffixes (186 levels)
+  name_vec <- gsub(".+(Igg|V04|Pcr\\d|Ucd|AlnRep|Std|Ifn|sc\\d+|a30|Control).*", "", name_vec)
+}
+
+
+adf <- adf[sample(nrow(adf), nrow(adf)),]
+adf$variable <- factor(as.character(adf$variable))
+
+n <- length(levels(adf$variable))
+library("RColorBrewer")
+cols <- colorRampPalette(brewer.pal(11, "Paired"))(n)
+
+
+pdf("~/hvl/thesis_plots/lasso_coefs.pdf", 10, 3.5)
+ggplot(adf, aes(x=-log10(lambda), y=value, col=variable, alpha=kept)) +
+  scale_x_reverse(expand=c(0,0)) +
+  scale_colour_manual(values=cols) +
+  scale_size_manual(values=c(5, 7)) +
+  theme_minimal() + 
+  geom_vline(aes(xintercept=-log10(chosen_lambda)),
+    col=I("grey50"), linetype="dashed") +
+  geom_line(aes(alpha=kept)) + 
+  theme(legend.position="none") +
+  scale_alpha_manual(values=c(.3, 1)) +
+  labs(y="Standardised coefficient", 
+    x=expression(-log[10](lambda))) +
+  scale_y_continuous(breaks=c(.5, 0, -.5),
+    labels=c(.5, "", -.5)) +
+  facet_wrap(~ct) +
+  geom_text(data=labs, hjust=0,
+    aes(label = labs, x=5.5, y=value, size=kept))
+dev.off()  
+
+pdf("~/hvl/thesis_plots/hlasso_coefs.pdf", 6, 5)
+ggplot(subset(adf, ct == "H1 hESC"),
+  aes(x=-log10(lambda), y=value, col=variable, alpha=kept)) +
+  scale_x_reverse(expand=c(0,0)) +
+  #scale_colour_manual(values=cols) +
+  scale_size_manual(values=c(5, 7)) +
+  theme_minimal() + 
+  geom_vline(aes(xintercept=-log10(chosen_lambda)),
+    col=I("grey50"), linetype="dashed") +
+  geom_line(aes(alpha=kept)) + 
+  theme(legend.position="none") +
+  scale_alpha_manual(values=c(.3, 1)) +
+  labs(y="Standardised coefficient", 
+    x=expression(-log[10](lambda))) +
+  scale_y_continuous(breaks=c(.5, 0, -.5),
+    labels=c(.5, "", -.5)) +
+  #facet_wrap(~ct) +
+  geom_text(data=subset(labs, ct == "H1 hESC"), hjust=0,
+    aes(label = labs, x=5.5, y=value, size=kept))
+dev.off()  
+
+
+
 
 pdf("~/hvl/thesis_plots/gfull_coefTrace.pdf", 4, 4)
 ggplot(cs, aes(x=-log10(lambda), y=value, col=kept, group=variable)) +
   scale_x_reverse(expand=c(0,0)) +
   scale_color_manual(values=c("grey70", "black")) +
   theme_minimal() + 
-  geom_vline(xintercept=-log10(ggcv$lambda.1se),
+  geom_vline(aes(xintercept=-log10(chosen_lambda)),
     col=I("grey50"), linetype="dashed") +
   geom_line(aes(alpha=kept)) + 
   theme(legend.position="none") +
