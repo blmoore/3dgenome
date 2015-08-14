@@ -49,3 +49,9 @@ data/rds/tadagg_H1hesc_34Vars.rds
 data/rds/tadagg_K562_34Vars.rds
 
 figures/inkscape/tads_epigenom.svg-g218699-644.png
+
+data/rds/gm_tadpred.rds
+
+data/rds/h1_tadpred.rds
+
+data/rds/k5_tadpred.rds

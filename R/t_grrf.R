@@ -202,6 +202,11 @@ hhh <- glmnet(as.matrix(hfull[train,-1]), y=hfull[train,]$eigen, alpha=1,
 kkk <- glmnet(as.matrix(kfull[train,-1]), y=kfull[train,]$eigen, alpha=1, 
   family="gaussian")
 
+sum(kkk$beta)
+kkk <- glmnet(as.matrix(kfull[train,-1]), y=kfull[train,]$eigen, alpha=1, 
+  family="gaussian", lambda=.0050)
+sum(kkk$beta)
+
 ggcv <- cv.glmnet(as.matrix(gfull[train,-1]), y=gfull[train,]$eigen, alpha=1, nlambda=100)
 hhcv <- cv.glmnet(as.matrix(hfull[train,-1]), y=hfull[train,]$eigen, alpha=1)
 kkcv <- cv.glmnet(as.matrix(kfull[train,-1]), y=kfull[train,]$eigen, alpha=1)
