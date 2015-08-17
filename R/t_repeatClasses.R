@@ -166,6 +166,26 @@ class_each <- Map(buildBoundariesDat,
   col="repClass", summary=F, steps=nsteps)
 class_each <- do.call(rbind, class_each)
 
+saveRDS(fam_each, "~/hvl/production/3dgenome/data/rds/rpt_fam.rds")
+saveRDS(class_each, "~/hvl/production/3dgenome/data/rds/rpt_class.rds")
+
+head(class_each)
+unique(fam_each$feat)
+
+tad_sine <- subset(fam_each, feat == "Alu" & type == "TADs")
+head(tad_sine)
+
+# code matches F_predictTADbounds.R
+ts <- melt(tad_sine, id.vars = c("name", "bound", "feat", "ct", "type"))
+ts <- subset(ts, variable %in% c("X1", "X12"))
+ts$variable <- ifelse(ts$variable == "X12", T, F)
+ts$name <- NULL
+
+rptdf <- dcast(ts, bound + type + ct + variable ~ feat, value.var="value")
+ggplot(rptdf, aes(x=variable, y=Alu)) + geom_violin()
+head(rptdf)
+
+  
 ## 1) profiles:
 pdf("plots/repFamily_1Mb.pdf", 6, 28)
 ggplot(fam_sum, aes(x=pos, y=mean, col=type, fill=type)) + 

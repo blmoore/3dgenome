@@ -37,7 +37,8 @@ teg$name <- NULL
 #table(teg$variable)
 
 taddf <- dcast(teg, bound + type + ct + variable ~ feat, value.var="value")
-#head(taddf)
+head(taddf)
+
 
 taddf$variable <- as.factor(ifelse(taddf$variable == T, 1, 0))
 
@@ -58,13 +59,16 @@ ctrf_auroc <- function(ct = c("Gm12878", "H1hesc", "K562")){
   preds <- predict(opt_rf, data=h1df[-train,], type="prob")
   message("predictions : ", length(preds))
   
-  print(head(preds))
+  #print(head(preds))
   
   #perf <- performance(  prediction(opt_rf$votes[,2], h1df$variable), "tpr", "fpr")
   perf <- performance(prediction(preds[,2], h1df[-train,]$variable), "tpr", "fpr")
   df <- data.frame(fp=unlist(perf@x.values), tp=unlist(perf@y.values), ct=ct)
   obj <- list()
   
+  obj$data <- h1df
+  obj$train_ind <- train
+  obj$predictions <- preds
   obj$auroc <- df
   obj$aurcrf <- auc_class
   obj$rf <- opt_rf
@@ -80,10 +84,13 @@ k5auc <- ctrf_auroc("K562")
 # saveRDS(h1auc, "data/rds/h1_tadpred.rds")
 # saveRDS(gmauc, "data/rds/gm_tadpred.rds")
 # saveRDS(k5auc, "data/rds/k5_tadpred.rds")
+gmauc <- readRDS("data/rds/gm_tadpred.rds")
+h1auc <- readRDS("data/rds/h1_tadpred.rds")
+k5auc <- readRDS("data/rds/k5_tadpred.rds")
 
 auc <- rbind(h1auc$auroc, gmauc$auroc, k5auc$auroc)
 
-pdf("~/hvl/thesis_plots/tad_bounds_auroc.pdf", 4.4, 4.4)
+pdf("~/hvl/thesis_plots/tad_bounds_auroc_v2.pdf", 4.4, 4.4)
 ggplot(auc, aes(x=fp, y=tp, col=ct)) + geom_line() +
   annotate("segment", x=0, xend=1, y=0, yend=1, linetype="dashed", col=I("grey20")) +
   scale_x_continuous(expand=c(0,0)) + coord_fixed() +
@@ -93,3 +100,23 @@ ggplot(auc, aes(x=fp, y=tp, col=ct)) + geom_line() +
 dev.off()
 
   
+get_imp <- function(rf, top=5){
+  i <- importance(rf)
+  i <- data.frame(imp=i, feat=rownames(i))
+  i <- i[order(i[,1], decreasing=T),][1:top,]
+  rownames(i) <- NULL
+  i
+}
+
+df <- get_imp(h1auc$rf)
+
+impdf <- rbind(data.frame(get_imp(gmauc$rf), ct="GM12878"),
+  data.frame(get_imp(h1auc$rf), ct="H1 hESC"),
+  data.frame(get_imp(k5auc$rf), ct="K562"))
+
+ggplot(impdf,aes(x=feat, y=MeanDecreaseGini, fill=ct)) + 
+  geom_bar(stat="identity") + #facet_wrap(~ct) + #, scales="free") +
+  coord_flip()
+
+impdf
+
