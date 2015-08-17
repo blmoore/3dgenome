@@ -96,18 +96,25 @@ k5auc <- readRDS("data/rds/k5_tadpred.rds")
 
 auc <- rbind(h1auc$auroc, gmauc$auroc, k5auc$auroc)
 
-pdf("~/hvl/thesis_plots/tad_bounds_auroc_v2.pdf", 4.4, 4.4)
-ggplot(auc, aes(x=fp, y=tp, col=ct)) + geom_line() +
-  annotate("segment", x=0, xend=1, y=0, yend=1, linetype="dashed", col=I("grey20")) +
-  scale_x_continuous(expand=c(0,0)) + coord_fixed() +
-  scale_y_continuous(expand=c(0,0)) +
-  theme_minimal() + theme(legend.position=c(.85,.15)) +
-  labs(col="Cell type", x="False positive rate", y="True positive rate")
-dev.off()
-
 # actual AUROC values
 get_auroc <- function(aucobj)
-  unlist(performance(prediction(aucobj$predictions[,2], aucobj$data[-aucobj$train_ind,]$variable), "auc")@y.values)
+  signif(unlist(performance(prediction(aucobj$predictions[,2], aucobj$data[-aucobj$train_ind,]$variable), "auc")@y.values),3)
+
+pdf("~/hvl/thesis_plots/tad_bounds_auroc_v3.pdf", 4.4, 4.4)
+ggplot(auc, aes(x=fp, y=tp, col=ct)) + 
+  annotate("segment", x=0, xend=1, y=0, yend=1, linetype="dashed", col=I("grey30")) +
+  geom_line(size=I(1.1)) +
+  scale_x_continuous(expand=c(0,0)) + coord_fixed() +
+  scale_y_continuous(expand=c(0,0)) +
+  theme_minimal() + theme(legend.position=c(.15,.86)) +
+  labs(col="Cell type", x="False positive rate", y="True positive rate") +
+  scale_color_manual(values=c("#0000ff98", "#FFA50098", "#ff000098")) +
+  # add AUC values
+  annotate("text", y = .24, x=.88, label="AUC", fontface=2, size=4.5) +
+  annotate("text", y = .06, x=.88, label=get_auroc(gmauc), colour="#0000ff", size=4.5) +
+  annotate("text", y = .18, x=.88, label=get_auroc(h1auc), colour="#FFA500", size=4.5) +
+  annotate("text", y = .12, x=.88, label=get_auroc(k5auc), colour="#ff0000", size=4.5)
+dev.off()
 
 get_auroc(gmauc)
 get_auroc(h1auc)
