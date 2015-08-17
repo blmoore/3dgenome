@@ -152,3 +152,39 @@ plot_imp(kp, header = "K562")
 mtext("Variable importance (mean decrease in Gini coefficient)", side=1, outer=T)
 dev.off()
 
+par(mfrow=c(3,1))
+plot(gmauc$aurcrf)
+plot(h1auc$aurcrf)
+plot(k5auc$aurcrf)
+
+
+aucrf <- rbind(
+  cbind(gmauc$aurcrf$AUCcurve, ct="GM12878"),
+  cbind(h1auc$aurcrf$AUCcurve, ct="H1 hESC"),
+  cbind(k5auc$aurcrf$AUCcurve, ct="K562"))
+
+chosen <- rbind(
+  data.frame(AUC=gmauc$aurcrf$`OOB-AUCopt`,
+  k=gmauc$aurcrf$Kopt,
+  ct="GM12878"),
+  data.frame(AUC=h1auc$aurcrf$`OOB-AUCopt`,
+    k=h1auc$aurcrf$Kopt,
+    ct="H1 hESC"),
+  data.frame(AUC=k5auc$aurcrf$`OOB-AUCopt`,
+    k=k5auc$aurcrf$Kopt,
+    ct="K562")
+  )
+  
+pdf("~/hvl/thesis_plots/AUCRF_opt.pdf", 4.4, 4.4)
+ggplot(aucrf, aes(x=k, y=AUC, col=ct)) + 
+  geom_segment(data=chosen, aes(y=AUC, yend=AUC, x=0, xend=k, col=ct), linetype="dashed") +
+  geom_segment(data=chosen, aes(y=.5, yend=AUC, x=k, xend=k, col=ct), linetype="dashed") +
+  geom_line(size=I(1.1)) +
+  theme_minimal() + theme(legend.position=c(.88,.16)) +
+  labs(col="Cell type", x="Number of variables in model",
+    y="AUROC") +
+  geom_point(data=chosen, size=I(2.5)) +
+  scale_x_continuous(expand=c(0,0)) +
+  scale_y_continuous(limits=c(.5, .75)) +
+  scale_color_manual(values=c("#0000ff98", "#FFA50098", "#ff000098")) 
+dev.off()
