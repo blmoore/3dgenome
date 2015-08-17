@@ -59,3 +59,9 @@ data/rds/k5_tadpred.rds
 data/rds/rpt_fam.rds
 
 data/rds/rpt_class.rds
+
+data/rds/rpt_fam_450.rds
+
+data/rds/rpt_class_450.rds
+
+data/rds/tadpred.rds

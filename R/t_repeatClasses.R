@@ -53,6 +53,13 @@ split_bed <- function(colvar = c("repFamily", "repClass")){
 #split_bed("repClass")
 
 ## -------------------- sh intersect.sh ----------------------------- ##
+
+## NB. thesis uses 42 (steps) of 50,000 (res) to give 1e6 (dist)
+##     for comparable profiles to those in TAD boundaries, change
+##     hard-coded values in binAroundBed.py to (e.g):
+##        res: 40000   steps: 25   dist: 500000
+## (note the larger the boundary span, the fewer total boundaries remain,
+##  a small number run off the end of a chromosome hence are discarded)
 options(warn=2)
 
 buildBoundariesDat <- function(ct=c("h1", "k5", "gm"), type=c("c", "t"),
@@ -146,7 +153,7 @@ blob <- function(each){
 }
   
 # nsteps: number of steps in binAroundBed.py -1 !
-nsteps <- 41
+nsteps <- 24
 
 fam_sum <- Map(buildBoundariesDat, 
   c("h1", "gm", "k5"), rep(c("c", "t"), 3), 
@@ -166,11 +173,10 @@ class_each <- Map(buildBoundariesDat,
   col="repClass", summary=F, steps=nsteps)
 class_each <- do.call(rbind, class_each)
 
-saveRDS(fam_each, "~/hvl/production/3dgenome/data/rds/rpt_fam.rds")
-saveRDS(class_each, "~/hvl/production/3dgenome/data/rds/rpt_class.rds")
+saveRDS(fam_each, "~/hvl/production/3dgenome/data/rds/rpt_fam_450.rds")
+saveRDS(class_each, "~/hvl/production/3dgenome/data/rds/rpt_class_450.rds")
 
-head(class_each)
-unique(fam_each$feat)
+fam_each <- readRDS("data/rds/rpt_fam_450.rds")
 
 tad_sine <- subset(fam_each, feat == "Alu" & type == "TADs")
 head(tad_sine)
