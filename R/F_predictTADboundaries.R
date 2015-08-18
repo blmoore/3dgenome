@@ -1,5 +1,7 @@
 library("ggplot2")
 library("reshape2")
+library("AUCRF")
+library("ROCR")
 
 rm(list=ls())
 # from 7_fig5boundaryEnrichments.R
@@ -46,9 +48,6 @@ taddf$Alu <- rptdf$Alu
 
 #saveRDS(taddf, "data/rds/tadpred.rds")
 
-
-library("AUCRF")
-library("ROCR")
 set.seed(42)
 
 ctrf_auroc <- function(cell, data=taddf){
@@ -59,7 +58,7 @@ ctrf_auroc <- function(cell, data=taddf){
   
   auc_class <- AUCRF(variable ~ ., data=h1df[train,], ntrees=200, pdel=0.1)
   opt_rf <- randomForest(as.formula(paste0("variable~", paste(as.vector(OptimalSet(auc_class)$Name), collapse="+"))),
-    data=h1df[train,])
+    data=h1df[train,], proximity = T, localImp = T)
 
   preds <- predict(opt_rf, newdata=h1df[-train,], type="prob")
   message("predictions : ", length(preds[,2]))
@@ -87,9 +86,9 @@ gmauc <- ctrf_auroc(cell="Gm12878")
 gmauc$auroc$ct <- "GM12878"
 k5auc <- ctrf_auroc(cell="K562")
 
-saveRDS(h1auc, "data/rds/h1_tadpred.rds")
-saveRDS(gmauc, "data/rds/gm_tadpred.rds")
-saveRDS(k5auc, "data/rds/k5_tadpred.rds")
+saveRDS(h1auc, "data/rds/h1_tadpred_v2.rds")
+saveRDS(gmauc, "data/rds/gm_tadpred_v2.rds")
+saveRDS(k5auc, "data/rds/k5_tadpred_v2.rds")
 gmauc <- readRDS("data/rds/gm_tadpred.rds")
 h1auc <- readRDS("data/rds/h1_tadpred.rds")
 k5auc <- readRDS("data/rds/k5_tadpred.rds")
@@ -188,3 +187,7 @@ ggplot(aucrf, aes(x=k, y=AUC, col=ct)) +
   scale_y_continuous(limits=c(.5, .75)) +
   scale_color_manual(values=c("#0000ff98", "#FFA50098", "#ff000098")) 
 dev.off()
+
+## proximity plots (MDS) on V2 saved objects
+
+MDSplot(h1auc$rf, k=3)
