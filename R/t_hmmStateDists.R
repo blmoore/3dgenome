@@ -41,7 +41,7 @@ alldf <- rbind(g, h, k)
   
 pal <- brewer.pal(9, "Paired")
 
-pdf("~/hvl/thesis_plots/hmmDists.pdf", 3, 4)
+pdf("~/hvl/thesis_plots/hmmDists.pdf", 3, 3.5)
 ggplot(alldf, aes(x=value, fill=interaction(state, cell), group=state)) + 
   geom_density(alpha=I(.6)) +
   facet_grid(cell~.) + #, scales="free_x") +
@@ -50,8 +50,8 @@ ggplot(alldf, aes(x=value, fill=interaction(state, cell), group=state)) +
   theme(legend.position="none",
     axis.ticks.y=element_blank(), axis.text.y=element_blank()) +
   labs(x="Compartment eigenvector",
-    y="Density", fill="HMM state") +
-  scale_y_continuous(expand=c(0,0))
+    y="Density", fill="HMM state") #+
+  #scale_y_continuous(expand=c(0,0))
 dev.off()
 
 
