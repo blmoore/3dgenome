@@ -20,6 +20,8 @@ hhmm <- state_hmm(hdat$eigen)
 ghmm <- state_hmm(gdat$eigen)
 khmm <- state_hmm(kdat$eigen)
 
+hhmm$HMM$transMat
+
 sim_state <- function(state, hmm, n=5e5){
   s <- list(mean=hmm$HMM$distribution$mean[[state]],
     var=hmm$HMM$distribution$var[[state]])

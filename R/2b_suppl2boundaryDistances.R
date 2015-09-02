@@ -64,6 +64,7 @@ rand.comps <- function(intb){
 }
 
 tad.dist <- function(tb, k, g, r){
+  # nb uses TAD start end inputs, not TAD boundaries
   ## calculate min distance to another tad boundary 
   # tb1 == tad boundaries you're comparing against
   # tb2, tb3 == the other two
@@ -118,9 +119,12 @@ comp.dist <- function(tb, k, g, r){
 
 ## 1) TADs:
 ## These boundaries are generated in 7_*.R
-htb <- read.table("data/bedfiles/h1_tadbounds.bed")
-ktb <- read.table("data/bedfiles/k5_tadbounds.bed")
-gtb <- read.table("data/bedfiles/gm_tadbounds.bed")
+htb <- read.table("data/bedfiles/h1_tads.bed")
+htb[,3] <- htb[,3] + 1
+ktb <- read.table("data/bedfiles/k5_tads.bed")
+ktb[,3] <- ktb[,3] + 1
+gtb <- read.table("data/bedfiles/gm_tads.bed")
+gtb[,3] <- gtb[,3] + 1
 
 rtb <- rand.tads(htb)
 tdf <- tad.dist(htb, ktb, gtb, rtb)
@@ -154,38 +158,49 @@ ggplot(bothdf, aes(x=value+1, col=variable)) +
   scale_color_brewer(type="qual", palette=3)
 dev.off()
 
-# thesis version, TADs only ::
-# pdf("~/hvl/thesis_plots/taddist.pdf", 4, 4)
-# ggplot(taddf, aes(x=value+1, col=variable)) +
-#   stat_ecdf(geom="line", size=1.1) + 
-#   scale_x_log10(breaks=c(10, 1000, 100000, 1e7),
-#     labels=c("10 bp", "1 kb", "100 kb", "10 Mb")) +
-#     theme_minimal() +
-#   theme(legend.position=c(.23,.86), legend.background=element_blank()) +
-#   labs(col="", y="ECDF", x="Distance to nearest H1 boundary") +
-#   scale_color_brewer(type="qual", palette=3) 
-# dev.off()  
+#thesis version, TADs only ::
+pdf("~/hvl/thesis_plots/taddist_v2.pdf", 4, 4)
+ggplot(taddf, aes(x=value, col=variable)) +
+  #geom_vline(xintercept=seq(from=1, by=40000, length.out=3), col=I("grey75")) +
+  geom_vline(xintercept=c(1000, 4e4, 8e4), col=I("grey75")) +
+  #stat_ecdf(geom="line", size=1.1) + 
+  stat_ecdf(geom="step", size=1.1) + 
+  
+  scale_x_log10(breaks=c(1e3, 1e5, 1e7),
+    limits=c(1e3, 1e7),
+    labels=c("< 1 kb", "100 kb",  "10 Mb")) +
+    theme_minimal() +
+  theme(legend.position=c(.23,.86), legend.background=element_blank()) +
+  labs(col="", y="ECDF", x="Distance to nearest H1 boundary") +
+  scale_color_brewer(type="qual", palette=3) 
+dev.off()  
 
-## thesis, Compartments only ::
-# pdf("~/hvl/thesis_plots/compdist.pdf", 4, 4)
-# ggplot(compdf, aes(x=value+1, col=variable)) +
-#   stat_ecdf(geom="line", size=1.1) + 
-#   scale_x_log10(breaks=c(10, 1000, 100000, 1e7),
-#     labels=c("10 bp", "1 kb", "100 kb", "10 Mb")) +
-#     theme_minimal() +
-#   theme(legend.position=c(.23,.86), legend.background=element_blank()) +
-#   labs(col="", y="ECDF", x="Distance to nearest H1 boundary") +
-#   scale_color_brewer(type="qual", palette=3) 
-# dev.off()
+# thesis, Compartments only ::
+compdf$variable <- factor(compdf$variable, levels=c("GM12878", "K562", "Null"))
+pdf("~/hvl/thesis_plots/compdist_v2.pdf", 4, 4)
+ggplot(compdf, aes(x=value, col=variable)) +
+  #geom_vline(xintercept=seq(from=1, by=40000, length.out=3), col=I("grey75")) +
+  geom_vline(xintercept=c(1000, 1e5, 2e5), col=I("grey75")) +
+  #stat_ecdf(geom="line", size=1.1) + 
+  stat_ecdf(geom="step", size=1.1) + 
+  
+  scale_x_log10(breaks=c(1e3, 1e5, 1e7),
+    limits=c(1e3, 1e7),
+    labels=c("< 1 kb", "100 kb",  "10 Mb")) +
+  theme_minimal() +
+  theme(legend.position=c(.23,.86), legend.background=element_blank()) +
+  labs(col="", y="ECDF", x="Distance to nearest H1 boundary") +
+  scale_color_brewer(type="qual", palette=3) 
+dev.off()
 
 # 4) Misc., statistical tests etc.
 median(tdf$K562)    # median: 300kb apart
 median(tdf$GM12878) # median: 180 kb
 
 # TADs: Prop of H1 bounds w/ ct bound <= 40 kb
-tad.g <- 100 * nrow(tdf[tdf$GM12878 <= 40000,]) / nrow(tdf) # 33.38 %
-tad.k <- 100 * nrow(tdf[tdf$K562 <= 40000,]) / nrow(tdf)    # 31.30 %
-tad.null <- 100 * nrow(tdf[tdf$Null <= 40000,]) / nrow(tdf) # 17.84 %
+tad.g <- 100 * nrow(tdf[tdf$GM12878 <= 40000,]) / nrow(tdf) # 45.35 %
+tad.k <- 100 * nrow(tdf[tdf$K562 <= 40000,]) / nrow(tdf)    # 41.06 %
+tad.null <- 100 * nrow(tdf[tdf$Null <= 40000,]) / nrow(tdf) # 21.51 %
 
 # Compartments: Prop of H1 bounds w/ ct bound <= 100 kb 
 comp.g <- 100 * nrow(cdf[cdf$GM12878 <= 100000,]) / nrow(cdf) # 36.90 %
