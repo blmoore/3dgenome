@@ -238,7 +238,7 @@ ggplot(blob(class_each), aes(x=feat, y=-log10(p), col=type,
   theme(axis.text.x=element_text(angle=45, hjust=1, vjust=1)) +
   scale_size_continuous(range=c(2,7)) +
   guides(col=guide_legend(override.aes=list(size=4))) +
-  geom_hline(yintercept=-log10(.05 / 264), linetype="dashed") +
+  geom_hline(yintercept=-log10(.05 / 32), linetype="dashed") +
   scale_colour_brewer(type="qual", palette=6) +
   ggtitle("Repeat classes over boundaries")
 dev.off()
@@ -254,7 +254,7 @@ ggplot(blob(fam_each), aes(x=feat, y=-log10(p), col=type,
   theme(axis.text.x=element_text(angle=45, hjust=1, vjust=1)) +
   scale_size_continuous(range=c(2,7)) +
   guides(col=guide_legend(override.aes=list(size=4))) +
-  geom_hline(yintercept=-log10(.05 / 264), linetype="dashed") +
+  geom_hline(yintercept=-log10(.05 / 88), linetype="dashed") +
   scale_colour_brewer(type="qual", palette=6) +
   ggtitle("Repeat families over boundaries")
 dev.off()
