@@ -176,6 +176,7 @@ class_each <- do.call(rbind, class_each)
 saveRDS(fam_each, "~/hvl/production/3dgenome/data/rds/rpt_fam_450.rds")
 saveRDS(class_each, "~/hvl/production/3dgenome/data/rds/rpt_class_450.rds")
 
+class_each <- readRDS("data/rds/rpt_class_450.rds")
 fam_each <- readRDS("data/rds/rpt_fam_450.rds")
 
 tad_sine <- subset(fam_each, feat == "Alu" & type == "TADs")
@@ -227,7 +228,7 @@ dev.off()
 
 options(warn=1)
 ## 2) bubble significance plots
-pdf("plots/repClass_bubble_1Mb.pdf", 6, 5)
+pdf("~/hvl/thesis_plots/repClass_bubble_1Mb.pdf", 6, 5)
 ggplot(blob(class_each), aes(x=feat, y=-log10(p), col=type,
   size=abs(bound.mean - edge.mean))) +
   facet_grid(ct~.) + 
@@ -243,7 +244,7 @@ ggplot(blob(class_each), aes(x=feat, y=-log10(p), col=type,
   ggtitle("Repeat classes over boundaries")
 dev.off()
 
-pdf("plots/repFamily_bubble_1Mb.pdf", 12, 5)
+pdf("~/hvl/thesis_plots/repFamily_bubble_1Mb.pdf", 12, 5)
 ggplot(blob(fam_each), aes(x=feat, y=-log10(p), col=type,
   size=abs(bound.mean - edge.mean))) +
   facet_grid(ct~.) + 

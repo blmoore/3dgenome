@@ -247,7 +247,7 @@ dev.off()
 
 ## All compartment boundaries, supplementary figure:
 pdf("figures/suppl/s10_compartmentBoundaries.pdf", 12, 12)
-ggplot(subset(gdf, type == "Compartments"),
+ggplot(subset(gdf, type == "Compartments" & feat != "GERP"),
        aes(x=pos, y=mean, ymin=means.l, ymax=means.u, 
            col=ct, fill=ct, shape=ct)) +
   geom_ribbon(alpha=I(.3), aes(linetype=NA)) +
@@ -265,7 +265,7 @@ dev.off()
 
 ## All TAD boundaries, supplementary figure:
 pdf("figures/suppl/s9_tadBoundaries.pdf", 12, 12)
-ggplot(subset(gdf, type == "TADs"), 
+ggplot(subset(gdf, type == "TADs" & feat != "GERP"), 
        aes(x=pos, y=mean, ymin=means.l, ymax=means.u, 
            col=ct, fill=ct, shape=ct, show_guide=F)) +
   geom_ribbon(alpha=I(.3), aes(linetype=NA)) +
