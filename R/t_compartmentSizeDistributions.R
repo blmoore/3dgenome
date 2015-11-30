@@ -72,3 +72,30 @@ plotSizeDists <- function(){
 pdf("~/hvl/thesis_plots/comp_sizedists.pdf", 8, 3)
   plotSizeDists()
 dev.off()
+
+## TAD size distributions
+read_tad <- function(file, celltype){
+  tads <- read.table(file)
+  tads$size <- tads$V3 - tads$V2
+  tads$celltype <- celltype
+  tads
+}
+
+
+gtads <- read_tad("data/bedfiles/gm_tads.bed", "GM12878")
+htads <- read_tad("data/bedfiles/h1_tads.bed", "H1 hESC")
+ktads <- read_tad("data/bedfiles/k5_tads.bed", "K562")
+
+tads <- rbind(gtads, htads, ktads)
+
+pdf("~/hvl/thesis_plots/tad_size_dist.pdf", 5, 3)
+ggplot(tads, aes(x=size/1e6, fill=celltype)) + 
+  geom_density(col=NA) +
+  coord_cartesian(xlim=c(0, 5)) +
+  theme_minimal() +
+  scale_y_continuous(expand = c(0,0)) +
+  scale_fill_manual(values=c("#0000ff88", "#FFA50088", "#ff000088")) +
+  labs(x="TAD size (Mb)", y="Density", fill="Cell type") +
+  theme(legend.position=c(.8,.8))
+dev.off()
+  
