@@ -88,7 +88,7 @@ ktads <- read_tad("data/bedfiles/k5_tads.bed", "K562")
 
 tads <- rbind(gtads, htads, ktads)
 
-pdf("~/hvl/thesis_plots/tad_size_dist.pdf", 5, 3)
+pdf("~/hvl/thesis_plots/tad_size_dist.pdf", 4.5, 3)
 ggplot(tads, aes(x=size/1e6, fill=celltype)) + 
   geom_density(col=NA) +
   coord_cartesian(xlim=c(0, 5)) +
@@ -96,6 +96,6 @@ ggplot(tads, aes(x=size/1e6, fill=celltype)) +
   scale_y_continuous(expand = c(0,0)) +
   scale_fill_manual(values=c("#0000ff88", "#FFA50088", "#ff000088")) +
   labs(x="TAD size (Mb)", y="Density", fill="Cell type") +
-  theme(legend.position=c(.8,.8))
+  theme(legend.position=c(.85,.8))
 dev.off()
   
