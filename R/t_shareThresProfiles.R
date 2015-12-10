@@ -158,7 +158,7 @@ buildBoundariesDat <- function(ct=c("H1hesc", "Gm12878", "K562"),
   }
   gdf$feat <-  rep(vars, each=steps)
   gdf$ct <- ct
-  gdf$type <- type
+  gdf$type <- if(type == "share") "HMM boundaries" else "Thresholding only"
   return(gdf)
 }
 
@@ -195,9 +195,10 @@ levels(caps) <- c("ATF3", "CEBP", "CHD1", "CHD2", "MYC", "CTCF",
 gdf$feat <- as.character(caps)
 
 ## Figure 5a: Selected average-o-grams for interesting features
-#pdf("figures/f5a_boundaryEnrichmentProfiles.pdf", 7.36, 4.27)
 
 to_plot <- c("CTCF", "POL2", "YY1", "RAD21")
+
+pdf("figures/ft_HMMvThresholdingBoundaryEnrichments.pdf", 7, 6)
 
 ggplot(subset(gdf,  feat %in% to_plot),
   aes(x=pos, y=mean, ymin=means.l, ymax=means.u, 
@@ -214,22 +215,22 @@ ggplot(subset(gdf,  feat %in% to_plot),
     shape="Compartment\ncell type")) +
   scale_color_manual(values=col2) + scale_fill_manual(values=col2f) 
 
-#dev.off()
+dev.off()
 
 
-  
+group_by(gdf, ct, feat, type) %>% tally()
   
 
 ## To test, need (row-wise) counts per position per feature!
-buildBoundariesFull <- function(ct=c("H1hesc", "Gm12878", "K562"), 
-  type=c("Compartments", "TADs")){
-  if(type == "Compartments"){
-    dir <- "data/nonrepo/cluster/"
-    steps <- 30
-  } else {
-    dir <- "data/nonrepo/cluster_tad/"
-    steps <- 25
-  }
+buildBoundariesDat <- function(ct=c("H1hesc", "Gm12878", "K562"), 
+  type=c("share", "thres")){
+  
+  type = match.arg(type)
+  #   type = "thres"
+  #   ct="H1hesc"
+  
+  dir <- paste0("data/nonrepo/", type, "/")
+  steps <- 30
   
   fl <- paste0(dir, list.files(dir, pattern=paste0(".*", ct,".*")))
   looper <- fl  

@@ -57,6 +57,30 @@ kb <- callCBounds(k.100k)
 gb <- callCBounds(g.100k)
 hb <- callCBounds(h.100k)
 
+
+orientate_bounds <- function(sfile){
+  compartments <- sapply(paste0("chr", c(1:22, "X")), function(x) {
+    cc <- sfile[sfile$chr == x,]
+    rle <- rle(cc$states)
+    # boundary blocks (i.e., last block of given state)
+    bounds <- cc[cumsum(rle$lengths),]   
+    bounds[,3:4] <- bounds[,3:4]+50000
+    bounds[,4] <- rle$values
+    return(bounds)
+  }, simplify=F)
+  compartments <- do.call(rbind, compartments)
+  outbed <- compartments[,c("chr", "start", "end")]
+  outbed$names <- paste0(compartments$chr, "-", compartments$start)
+  
+  outbed[,c("names", "end")]
+}
+
+# 2 == A, A-B transition
+gbo <- orientate_bounds(g.100k)
+hbo <- orientate_bounds(h.100k)
+kbo <- orientate_bounds(k.100k)
+
+
 write.bed(kb, "data/bedfiles/k5_compartmentbounds.bed")
 write.bed(gb, "data/bedfiles/gm_compartmentbounds.bed")
 write.bed(hb, "data/bedfiles/h1_compartmentbounds.bed")
