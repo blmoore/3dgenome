@@ -76,9 +76,9 @@ orientate_bounds <- function(sfile){
 }
 
 # 2 == A, A-B transition
-gbo <- orientate_bounds(g.100k)
-hbo <- orientate_bounds(h.100k)
-kbo <- orientate_bounds(k.100k)
+go <- orientate_bounds(g.100k)
+ho <- orientate_bounds(h.100k)
+ko <- orientate_bounds(k.100k)
 
 
 write.bed(kb, "data/bedfiles/k5_compartmentbounds.bed")
@@ -86,38 +86,38 @@ write.bed(gb, "data/bedfiles/gm_compartmentbounds.bed")
 write.bed(hb, "data/bedfiles/h1_compartmentbounds.bed")
 
 # call bounds using simple threshold, see which boundaries overlap
-
-thresholdCBounds <- function(sfile){
-  compartments <- sapply(paste0("chr", c(1:22, "X")), function(x) {
-    cc <- sfile[sfile$chr == x,]
-    ctype <- ifelse(cc[,6] > 0, "A", "B")
-    rle <- rle(ctype)
-    # boundary blocks (i.e., last block of given state)
-    bounds <- cc[cumsum(rle$lengths),]   
-    bounds[,3:4] <- bounds[,3:4]+50000
-    return(bounds)
-  }, simplify=F)
-  compartments <- do.call(rbind, compartments)
-  outbed <- compartments[,c("chr", "start", "end")]
-  outbed$names <- paste0(compartments$chr, "-", compartments$start)
-  return(outbed)
-}
-
-kbo <- thresholdCBounds(k.100k)
-gbo <- thresholdCBounds(g.100k)
-hbo <- thresholdCBounds(h.100k)
-
-split_write <- function(thresbounds, ref, ct){
-  shared <- ifelse(thresbounds$names %in% ref$names, T, F)
-  write.bed(thresbounds[shared,], 
-    paste0("data/bedfiles/", ct, "sharedcbounds.bed"))
-  write.bed(thresbounds[!shared,], 
-    paste0("data/bedfiles/", ct, "threscbounds.bed"))
-}
-  
-split_write(gbo, gb, "g")  
-split_write(hbo, hb, "h")  
-split_write(kbo, kb, "k")  
+# 
+# thresholdCBounds <- function(sfile){
+#   compartments <- sapply(paste0("chr", c(1:22, "X")), function(x) {
+#     cc <- sfile[sfile$chr == x,]
+#     ctype <- ifelse(cc[,6] > 0, "A", "B")
+#     rle <- rle(ctype)
+#     # boundary blocks (i.e., last block of given state)
+#     bounds <- cc[cumsum(rle$lengths),]   
+#     bounds[,3:4] <- bounds[,3:4]+50000
+#     return(bounds)
+#   }, simplify=F)
+#   compartments <- do.call(rbind, compartments)
+#   outbed <- compartments[,c("chr", "start", "end")]
+#   outbed$names <- paste0(compartments$chr, "-", compartments$start)
+#   return(outbed)
+# }
+# 
+# kbo <- thresholdCBounds(k.100k)
+# gbo <- thresholdCBounds(g.100k)
+# hbo <- thresholdCBounds(h.100k)
+# 
+# split_write <- function(thresbounds, ref, ct){
+#   shared <- ifelse(thresbounds$names %in% ref$names, T, F)
+#   write.bed(thresbounds[shared,], 
+#     paste0("data/bedfiles/", ct, "sharedcbounds.bed"))
+#   write.bed(thresbounds[!shared,], 
+#     paste0("data/bedfiles/", ct, "threscbounds.bed"))
+# }
+#   
+# split_write(gbo, gb, "g")  
+# split_write(hbo, hb, "h")  
+# split_write(kbo, kb, "k")  
 
 # Now need to generate bins around these boundaries. This is done 
 # via binAroundBed.py, i.e.:
@@ -182,6 +182,10 @@ procBounds(g.b, "gm")
 
 buildBoundariesDat <- function(ct=c("H1hesc", "Gm12878", "K562"), 
                                type=c("Compartments", "TADs")){
+  
+#   ct = "H1hesc"
+#   type = "Compartments"
+#   
   ## Combine TADs and boundaries into big dataframe
   if(type == "Compartments"){
     dir <- "data/nonrepo/cluster/"
@@ -195,8 +199,18 @@ buildBoundariesDat <- function(ct=c("H1hesc", "Gm12878", "K562"),
   looper <- fl  
   # initiate all.dat df
   a <- read.delim(fl[1], header=F)
-  all.dat <- data.frame(row.names=a$V1)
+  #all.dat <- data.frame(row.names=a$V1)
   vars <- c(colnames(h.dat)[-1], "gerp")
+  
+  # get boundary bin start co-ord (for orientation)
+  bins <- as.character(a[seq(15, nrow(a), by=30),1])
+  starts <- as.numeric(gsub("^.*?_(\\d+)_.*", "\\1", bins)) - 50000
+  chr <- as.character(gsub("_.*", "", bins))
+  
+  # match orientations loaded above
+  oref <- if( ct == "H1hesc") ho else if( ct == "Gm12878" ) go else ko
+  orientation <- data.frame(id=paste0(chr, "-", starts))
+  orientation <- merge(orientation, oref, by.x="id", by.y="names", all.x=T)
   
   matches <- lapply(vars, function(x) grep(x, fl)[1])
   m <- fl[unlist(matches)]
@@ -211,11 +225,22 @@ buildBoundariesDat <- function(ct=c("H1hesc", "Gm12878", "K562"),
                     mean=numeric(), mean.l=numeric(), 
                     mean.u=numeric())
   bins <- matrix(nrow=0, ncol=steps)
+  
+  ind = 1
   for(f in looper){
                    
     message(f)
     feat <- read.table(f)  
     ac <- matrix(feat$V5, ncol=steps, byrow=T)
+    #message(nrow(ac))
+    
+    #heuristic to match boundary direction:
+    for(r in 1:nrow(ac)){
+      # reverse those going B -> A
+      if(orientation[r, "end"] == 1)
+        ac[r, ] <- ac[r, steps:1]
+    }
+    
     ac[is.nan(ac)] <- 0
     
     means <- colMeans(ac)
@@ -224,6 +249,7 @@ buildBoundariesDat <- function(ct=c("H1hesc", "Gm12878", "K562"),
     outr <- data.frame(name=f, pos=1:steps, 
                        mean=means, means.l=means-se, means.u=means+se)
     gdf <- rbind(gdf, outr)
+    ind = ind + 1
   }
   gdf$feat <-  rep(vars, each=steps)
   gdf$ct <- ct
@@ -244,7 +270,7 @@ h.t <- buildBoundariesDat("H1hesc", "TADs")
 g.t <- buildBoundariesDat("Gm12878", "TADs")
 k.t <- buildBoundariesDat("K562", "TADs")
 
-gdf <- rbind(h.c, g.c, k.c, # comps
+gdf <- rbind(h.c, g.c, k.c)#, # comps
              h.t, g.t, k.t) # TADs
 
 # Colours for Fig. 5: TADs: blue; Compartments: red;
@@ -388,6 +414,8 @@ buildBoundariesFull <- function(ct=c("H1hesc", "Gm12878", "K562"),
 
 # Compartments:
 hc.full <- buildBoundariesFull("H1hesc", "Compartments")
+length(levels(hc.full$feat)) * max(hc.full$bound)
+
 gc.full <- buildBoundariesFull("Gm12878", "Compartments")
 kc.full <- buildBoundariesFull("K562", "Compartments")
 
